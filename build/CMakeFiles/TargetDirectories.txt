@@ -1,3 +1,3 @@
-G:/programming/cpp/fecs/build/CMakeFiles/FECS.dir
-G:/programming/cpp/fecs/build/CMakeFiles/edit_cache.dir
-G:/programming/cpp/fecs/build/CMakeFiles/rebuild_cache.dir
+/run/media/akihiro/Akihiro/programming/cpp/fecs/build/CMakeFiles/FECS.dir
+/run/media/akihiro/Akihiro/programming/cpp/fecs/build/CMakeFiles/edit_cache.dir
+/run/media/akihiro/Akihiro/programming/cpp/fecs/build/CMakeFiles/rebuild_cache.dir
