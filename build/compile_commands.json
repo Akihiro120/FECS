@@ -1,0 +1,8 @@
+[
+{
+  "directory": "G:/programming/cpp/fecs/build",
+  "command": "C:\\PROGRA~1\\LLVM\\bin\\CLANG_~1.EXE -O0 -D_DEBUG -D_DLL -D_MT -Xclang --dependent-lib=msvcrtd -g -Xclang -gcodeview -o CMakeFiles\\FECS.dir\\main.cpp.obj -c G:\\programming\\cpp\\fecs\\main.cpp",
+  "file": "G:\\programming\\cpp\\fecs\\main.cpp",
+  "output": "CMakeFiles\\FECS.dir\\main.cpp.obj"
+}
+]
