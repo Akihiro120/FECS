@@ -6,4 +6,4 @@ file (GLOB_RECURSE source
     "src/*.cpp"
 )
 
-add_executable(${PROJECT_NAME} main.cpp)
+add_executable(${PROJECT_NAME} main.cpp ${source})
