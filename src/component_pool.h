@@ -37,14 +37,14 @@ public:
             m_sparse[id][typeid(T)] = dense_index;
 
             // debug message
-            std::cout << "Added Component" << std::endl;
-            std::cout << "\tEntity ID: " << id << std::endl;
-            std::cout << "\tD-Index: " << dense_index << std::endl;
-            std::cout << "\tMap Index: " << typeid(T).name() << std::endl;
-            std::cout << "\tC-Map Index: " << component_index << std::endl;
+            // std::cout << "Added Component" << std::endl;
+            // std::cout << "\tEntity ID: " << id << std::endl;
+            // std::cout << "\tD-Index: " << dense_index << std::endl;
+            // std::cout << "\tMap Index: " << typeid(T).name() << std::endl;
+            // std::cout << "\tC-Map Index: " << component_index << std::endl;
             return;
         }
-        std::cout << "Component already Exists?" << std::endl;
+        // std::cout << "Component already Exists?" << std::endl;
     }
 
     // remove element
@@ -75,8 +75,7 @@ public:
 
             return;
         }
-
-        std::cout << "Component doesn't Exist?" << std::endl;
+        // std::cout << "Component doesn't Exist?" << std::endl;
     }
 
     // get component
@@ -93,7 +92,7 @@ public:
             // reinterpret the data
             return reinterpret_cast<T*>(comp_map[index]);
         }
-        std::cout << "Component doesn't Exist?" << std::endl;
+        // std::cout << "Component doesn't Exist?" << std::endl;
         return nullptr;
     }
 
