@@ -2,6 +2,8 @@
 
 A lighweight and flexible Entity Component System (ECS) framework built for flexibility and high-performance game development. This framework provides an efficient way to manage entities, components, and systems.
 
+FECS utilises complex data structures like, sparse sets, and bitsets to allow for fast entity querying, and creation.
+
 ### Features
 - **Entity Management**
 - **Component-Based Design**
@@ -14,20 +16,68 @@ A lighweight and flexible Entity Component System (ECS) framework built for flex
     - Entities
     - Components
     - Systems
-- Performance
-- Contribution
-- License
 
 ### Getting Started
+Download the (latest release)[https://github.com/Akihiro120/FECS/releases/tag/v1.0.1].
+
+Include the FECS library, ```#include <FECS.h>```
+
+Initialize the FECS context
+``` c++
+FECS fecs;
+
+// .. insert code here
+
+fecs.terminate();
+```
 
 ### Usage - Entities
+Entities are uint32_t IDs.
+
+``` c++
+EntityID entity = fecs.add_entity();
+```
 
 ### Usage - Components
+To create a component, you create a class/struct and inherit the **Component** base structure.
+
+```
+struct Position : public Component {
+    float x;
+    float y;
+
+    Position(float x, float y) {
+        this->x = x;
+        this->y = y;
+    }
+};
+```
+
+You can then attach a component to an entity
+
+``` c++
+fecs.add<Position>(entity, Position{0.0f, 0.0f});
+```
+
+You can remove with
+``` c++
+fecs.remove<Position>(entity);
+```
+
+An entity can only have one of any component type.
 
 ### Usage - Systems
+For systems, its a unique and functional process. There is no concept of a system class.
 
-### Performance
+To create a system, you have to query components, then use a lambda function to utilize it.
 
-### Contributions
+``` c++
+ecs.query_system<Position, Velocity>(
+    [&](Position& pos, Velocity& vel) {
+    // apply function
+    pos.x += vel.x;
+    pos.y += vel.y;
+});
+```
 
-### License
+This allows for flexible and functional system management and creation.
