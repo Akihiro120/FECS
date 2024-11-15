@@ -1,52 +1,48 @@
 #include "src/FECS.h"
+#include "unittests.h"
+#include <chrono>
+#include <thread>
 
-struct Velocity : public Component {
-    float x;
-    float y;
+struct Timer {
+	 std::chrono::high_resolution_clock::time_point start, end;
+	 std::chrono::duration<float> duration;
 
-    Velocity(float x, float y) {
-        this->x = x;
-        this->y = y;
-    }
-};
+	 Timer() {
+		  start = std::chrono::high_resolution_clock::now();
+	 }
 
-struct Position : public Component {
-    float x;
-    float y;
+	 ~Timer() {
+		  end = std::chrono::high_resolution_clock::now();
+		  duration = end - start;
 
-    Position(float x, float y) {
-        this->x = x;
-        this->y = y;
-    }
+		  float ms = duration.count() * 1000.0f;
+		  std::cout << "Process took" << ms << "ms" << std::endl;
+	 }
 };
 
 int main() {
     // initialize fecs
     FECS ecs;
+	 
+	 int sample = 100;
+	 for (int i = 0; i < sample; i++) {
+		  auto e1 = ecs.add_entity();
+		  ecs.add<Position>(e1, Position(0.0f, 0.0f));
+	 }
 
-    // entities
-    EntityID entity = ecs.add_entity();
 
-    // add testing
-    ecs.add<Position>(entity, Position{0.0f, 0.0f});
-    ecs.add<Velocity>(entity, Velocity{1.0f, 1.0f});
+	 Timer timer;
 
-    // systems
-    for (int i = 0; i < 100; i++) {
-        ecs.query_system<Position, Velocity>([&](Position& pos, Velocity& vel) {
-            // query position, and velocity entity
-            // update the position
-            pos.x += vel.x;
-            pos.y += vel.y;
-        });
-    }
+	 ecs.query_system<Position>([&](EntityID id, Position& position) {
+	 });
 
-    // get the components
-    std::cout << ecs.get<Position>(entity)->x << std::endl;
-    std::cout << ecs.get<Position>(entity)->y << std::endl;
-        
-    // terminate fecs
-    ecs.terminate();
+	 ecs.query_system<Position>([&](EntityID id, Position& position) {
+	 });
+
+	 ecs.query_system<Position>([&](EntityID id, Position& position) {
+	 });
+
+	 ecs.terminate();
 
     return 0;
 }

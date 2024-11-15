@@ -1,4 +1,4 @@
-# Install script for directory: /run/media/akihiro/Akihiro/programming/cpp/fecs
+# Install script for directory: /run/media/akihiro/Akihiro/programming/cpp/functionallibraries/fecs
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -57,6 +57,6 @@ endif()
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-  file(WRITE "/run/media/akihiro/Akihiro/programming/cpp/fecs/build/${CMAKE_INSTALL_MANIFEST}"
+  file(WRITE "/run/media/akihiro/Akihiro/programming/cpp/functionallibraries/fecs/build/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")
 endif()

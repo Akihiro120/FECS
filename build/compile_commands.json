@@ -1,8 +1,8 @@
 [
 {
-  "directory": "/run/media/akihiro/Akihiro/programming/cpp/fecs/build",
-  "command": "/usr/bin/c++ -o CMakeFiles/FECS.dir/main.cpp.o -c /run/media/akihiro/Akihiro/programming/cpp/fecs/main.cpp",
-  "file": "/run/media/akihiro/Akihiro/programming/cpp/fecs/main.cpp",
+  "directory": "/run/media/akihiro/Akihiro/programming/cpp/functionallibraries/fecs/build",
+  "command": "/usr/bin/c++ -o CMakeFiles/FECS.dir/main.cpp.o -c /run/media/akihiro/Akihiro/programming/cpp/functionallibraries/fecs/main.cpp",
+  "file": "/run/media/akihiro/Akihiro/programming/cpp/functionallibraries/fecs/main.cpp",
   "output": "CMakeFiles/FECS.dir/main.cpp.o"
 }
 ]
