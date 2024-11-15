@@ -37,7 +37,7 @@ public:
 				mSparse[id] = mDense.size() - 1;
 				return;
 		  }
-		  std::cout << "Entity ID " << id << " Already Exists in " << typeid(T).name() << std::endl;
+		  /*std::cout << "Entity ID " << id << " Already Exists in " << typeid(T).name() << std::endl;*/
 	 }
 
 	 void remove(EntityID id) override {
@@ -59,7 +59,7 @@ public:
 				mSparse.erase(id);
 				return;
 		  }
-		  std::cout << "Entity ID " << id << " doesn't have a " << typeid(T).name() << std::endl;
+		  /*std::cout << "Entity ID " << id << " doesn't have a " << typeid(T).name() << std::endl;*/
 	 }
 
 	 T* get(EntityID id) {
@@ -67,7 +67,7 @@ public:
 		  if (mSparse.find(id) != mSparse.end()) {
 				return &mDense[mSparse[id]];
 		  }
-		  std::cout << "Component Entry doesnt exist" << std::endl;
+		  /*std::cout << "Component Entry doesnt exist" << std::endl;*/
 		  return nullptr;
 	 }
 
