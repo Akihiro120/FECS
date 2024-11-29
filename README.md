@@ -14,12 +14,19 @@ FECS utilises complex data structures like, sparse sets, and bitsets to allow fo
 - **Efficient Memory Layout**
 
 ### Table of Contents
+- Wrappers
 - Getting Started
 - Benchmark
 - Usage
     - Entities
     - Components
     - Systems
+ 
+### Wrappers
+---
+|                                       | Language |
+| --------------------------------------| :------: |
+| https://github.com/Akihiro120/FECS-rs | Rust     |
 
 ### Benchmark
 ---
