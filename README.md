@@ -1,8 +1,8 @@
-FECS - A Lightweight Entity Component System
+# FECS - A Lightweight Entity Component System
 
 FECS is a lightweight, header-only Entity Component System (ECS) written in modern c++. It leverages a custom sparse set data structure to acheieve near constant-time insertion, removal and retrieval of components. FECS has been designed with clarity and efficiency in mind, suitable for small-to-medium projects and for educational purposes.
 
---
+---
 
 ### Features
 - **Entity Management**
@@ -16,7 +16,7 @@ FECS is a lightweight, header-only Entity Component System (ECS) written in mode
 - **Modern C++ Techniques**
     Uses templates, assertions, and RAII for robust maintainable code.
 
---
+---
 
 ### Getting Started
 #### Prerequisites
@@ -34,7 +34,7 @@ Then, in your C++ source file:
 #include "fecs.h"
 ```
 
--- 
+---
 ### Usage
 #### Preprocessors
 You can define and change the MAX size for the Sparse, and the MAX number of components for FECS.
@@ -75,10 +75,10 @@ ecs.query<Position, Velocity>([](Entity e, Position& pos, Velocity& vel) {
 });
 ```
 
---
+---
 ### Contributing
 Contributions to FECS are most welcome. If you have ideas for improvement or have identified any issues, please open an issue or submit a pull request. When contributing, please maintain the current academic tone and clarity of documentation.
 
---
+---
 ### License
 This project is licensed under the MIT Licence – see the LICENCE file for details.
