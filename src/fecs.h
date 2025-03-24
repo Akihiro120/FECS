@@ -47,6 +47,20 @@ public:
 	}
 
 	template <typename T>
+	void preregister_component() {
+		// register the component if it doesnt yet exist
+		if (mCSignature.find(typeid(T)) == mCSignature.end()) {
+			
+			// create storage 
+			mStorage[typeid(T)] = new SparseSet<T>;
+
+			// add signature
+			size_t sig = mCSignature.size();
+			mCSignature[typeid(T)] = sig;
+		}
+	}
+
+	template <typename T>
 	void attach(Entity id, T component) {
 		// register the component if it doesnt yet exist
 		if (mCSignature.find(typeid(T)) == mCSignature.end()) {
