@@ -1,200 +1,130 @@
 #pragma once
-#include <vector>
-#include <unordered_map>
-#include <cstdint>
-#include <typeindex>
+#include "sparse_set.h"
 #include <bitset>
-#include <iostream>
+#include <typeindex>
+#include <unordered_map>
 
-#define FECS_MAX_COMPONENTS 32
+#define MAX_COMPONENTS 100
 
-// an id used to identify an entity
-using EntityID = uint32_t;
+using Entity = uint32_t;
 
-// base structure for a component
-struct Component {
-
-};
-
-// sparse set base
-class SparseSetBase {
-public:
-	 virtual void remove(EntityID id) = 0; 
-};
-
-// data structure used to contain components, derived from sparseset
-template <typename T>
-class SparseSet : public SparseSetBase{
-public:
-	 void add(EntityID id, T component) {
-		  // check if the id is in the registry 
-		  if (mSparse.find(id) == mSparse.end()) {
-				// add the component to the dense map
-				mDense.push_back(component);
-				mEntities.push_back(id);
-
-				// add the entity to the sparse map		
-				mSparse[id] = mDense.size() - 1;
-				return;
-		  }
-		  /*std::cout << "Entity ID " << id << " Already Exists in " << typeid(T).name() << std::endl;*/
-	 }
-
-	 void remove(EntityID id) override {
-		  if (mSparse.find(id) != mSparse.end()) {
-				// get the last and current dense index
-				uint32_t dense_index = mSparse[id];
-				uint32_t last_index = mDense.size() - 1;
-
-				// swap the last index with the current id
-				mDense[dense_index] = mDense[last_index];
-				mEntities[dense_index] = mEntities[last_index];
-
-				// replace index
-				mSparse[mEntities[last_index]] = dense_index;
-
-				// remove
-				mDense.pop_back();
-				mEntities.pop_back();
-				mSparse.erase(id);
-				return;
-		  }
-		  /*std::cout << "Entity ID " << id << " doesn't have a " << typeid(T).name() << std::endl;*/
-	 }
-
-	 T* get(EntityID id) {
-		  // check if the id is in the registry 
-		  if (mSparse.find(id) != mSparse.end()) {
-				return &mDense[mSparse[id]];
-		  }
-		  /*std::cout << "Component Entry doesnt exist" << std::endl;*/
-		  return nullptr;
-	 }
-
-private:
-	 std::vector<T> mDense;
-	 std::unordered_map<EntityID, uint32_t> mSparse;
-	 std::vector<EntityID> mEntities;
-};
-
-/*
-    FECS is a flexible ECS
-*/
 class FECS {
 public:
-    // constructor
-    FECS() {
-        // debug message initialization
-    }
+	FECS() {}
+	~FECS() {}
 
-    // add entity
-    EntityID add_entity() {
-        // create new entity
-        EntityID id;
-		 
-		  if (mFreeIDs.empty()) {
-				// there are no free ids
-				mEntityIDs.push_back(true);
-				id = mEntityIDs.size() - 1;
-		  } else {
-				// there are free ids
-				id = mFreeIDs[mFreeIDs.size() - 1];
-				mFreeIDs.pop_back();
-				mEntityIDs[id] = true;
-		  }
-        
-        return id;
-    }
+	Entity create_entity() {
+		Entity id;
+		if (mFreeEntities.empty()) {
+			mNextID++;
+			id = mNextID-1;
+		} else {
+			id = mFreeEntities[mFreeEntities.size() - 1];
+			mFreeEntities.pop_back();
+		}
 
-	 // remove entity
-	 void remove_entity(EntityID id) {
-		  // remove from all components
-		  for (auto& [type_index, set] : mComponents) {
-				set->remove(id);
-		  }
+		std::bitset<MAX_COMPONENTS> sig;
+		mESignatures[id] = sig;
+		mSignatures[sig].insert(id, id);
+		return id;
+	}
 
-		  // remove the entity and add it to the free ids
-		  mFreeIDs.push_back(id);
+	void remove_entity(Entity id) {
+		mFreeEntities.push_back(id);
 
-		  // remove signature
-		  mSignatures.erase(id);
+		// remove signatures
+		auto it = mESignatures.find(id);
+		if (it != mESignatures.end()) {
+			auto old = it->second;
+			mSignatures[old].remove(id);
+			mESignatures.erase(it);
+		}
+		
+		// remove components
+		for (auto& storage : mStorage) {
+			storage.second->remove(id);
+		}
+	}
 
-		  // remove
-		  mEntityIDs[id] = false;
-	 }
+	template <typename T>
+	void attach(Entity id, T component) {
+		// register the component if it doesnt yet exist
+		if (mCSignature.find(typeid(T)) == mCSignature.end()) {
+			
+			// create storage 
+			mStorage[typeid(T)] = new SparseSet<T>;
 
-	 // add component
-	 template <typename T>
-	 void add(EntityID id, T component) {
-		  // check if the component set exists
-		  if (mComponents.find(typeid(T)) == mComponents.end()) {
-				// create new sparse set
-				mComponents[typeid(T)] = new SparseSet<T>;
+			// add signature
+			size_t sig = mCSignature.size();
+			mCSignature[typeid(T)] = sig;
+		}
 
-				// add component index
-				uint32_t index = mComponentIndex.size();
-				mComponentIndex[typeid(T)] = index;
-		  }
+		// add component to storage
+		SparseSet<T>* storage = reinterpret_cast<SparseSet<T>*>(mStorage[typeid(T)]);
+		storage->insert(id, component);
 
-		  // add to sparse set
-		  reinterpret_cast<SparseSet<T>*>(mComponents[typeid(T)])->add(id, component);
+		auto e_sig = mESignatures[id];
 
-		  // update signature
-		  mSignatures[id] |= 1 << mComponentIndex[typeid(T)];
-	 }
+		mSignatures[e_sig].remove(id);
 
-	 // remove component
-	 template <typename T>
-	 void remove(EntityID id) {
-		  reinterpret_cast<SparseSet<T>*>(mComponents[typeid(T)])->remove(id);
-		  
-		  // update signature
-		  mSignatures[id] ^= 1 << mComponentIndex[typeid(T)];
-	 }
+		auto bit = mCSignature[typeid(T)];
+		mESignatures[id].set(bit);
+		mSignatures[mESignatures[id]].insert(id, id);
+	}
 
-	 // get component
-	 template <typename T>
-	 T* get(EntityID id) {
-		  return reinterpret_cast<SparseSet<T>*>(mComponents[typeid(T)])->get(id);
-	 }
+	template <typename T>
+	void detach(Entity id) {
+		auto it = mCSignature.find(typeid(T));
+		if (it != mCSignature.end()) {
+			size_t c_index = it->second;
+			auto storage = reinterpret_cast<SparseSet<T>*>(mStorage[typeid(T)]);
+			storage->remove(id);
 
-	 // query components
-	 template <typename... Components, typename Func>
-	 void query_system(Func&& fn) {
-		  // create a bitset 
-		  std::bitset<FECS_MAX_COMPONENTS> required_bit_set;
-		  (required_bit_set.set(mComponentIndex[typeid(Components)]), ...);
+			auto& e_sig = mESignatures[id];
+			mSignatures[e_sig].remove(id);
+			e_sig.reset(c_index);
+			mSignatures[e_sig].insert(id, id);
+		}
+	}
 
-		  // iterate through each entity and get a list of those who match
-		  std::vector<EntityID> entities;
-		  for (auto signature : mSignatures) {
-				// get matching signatures
-				if ((signature.second & required_bit_set) == required_bit_set) {
-					 entities.push_back(signature.first);
+	template <typename T>
+	T* get(Entity id) {
+		auto it = mStorage.find(typeid(T));
+		if (it != mStorage.end()) {
+			return reinterpret_cast<SparseSet<T>*>(mStorage[typeid(T)])->get(id);
+		}
+		return nullptr;
+	}
+
+	template <typename... C, typename func>
+	void query(func&& fn) {
+		std::bitset<MAX_COMPONENTS> required_bits;
+		(required_bits.set(mCSignature[typeid(C)]), ...);
+
+		// get the entities
+		for (auto& sets : mSignatures) {
+			if ((sets.first & required_bits) == required_bits) {
+				// get the entities
+				for (auto entities : sets.second.get_all()) {
+					fn(entities, *get<C>(entities)...);
 				}
-		  }
+			}
+		}
+	}
 
-		  // update
-		  for (int i = 0; i < entities.size(); i++) {
-				// apply lambda function
-				fn(entities[i], *get<Components>(entities[i])...);
-		  }
-	 }
-
-	 void terminate() {
-		  // clear the sparse sets
-		  for (auto& [type, set] : mComponents) {
-				delete set;
-		  }
-	 }
+	void clean() {
+		// free memory
+		mESignatures.clear();
+		mCSignature.clear();
+		mStorage.clear();
+		mSignatures.clear();
+	}
 
 private:
-    // ecs related
-    std::vector<bool> mEntityIDs;
-    std::vector<EntityID> mFreeIDs;
-	 
-	 // ecs archetypes
-	 std::unordered_map<EntityID, std::bitset<FECS_MAX_COMPONENTS>> mSignatures;
-	 std::unordered_map<std::type_index, SparseSetBase*> mComponents; 
-	 std::unordered_map<std::type_index, uint32_t> mComponentIndex;
+	int mNextID = 0;
+	std::vector<Entity> mFreeEntities;
+	std::unordered_map<std::type_index, ISparseSet*> mStorage;
+	std::unordered_map<std::type_index, size_t> mCSignature;
+	std::unordered_map<std::bitset<MAX_COMPONENTS>, SparseSet<Entity>> mSignatures;
+	std::unordered_map<Entity, std::bitset<MAX_COMPONENTS>> mESignatures;
 };

@@ -1,48 +1,75 @@
-#include "src/FECS.h"
-#include "unittests.h"
-#include <chrono>
-#include <thread>
-
-struct Timer {
-	 std::chrono::high_resolution_clock::time_point start, end;
-	 std::chrono::duration<float> duration;
-
-	 Timer() {
-		  start = std::chrono::high_resolution_clock::now();
-	 }
-
-	 ~Timer() {
-		  end = std::chrono::high_resolution_clock::now();
-		  duration = end - start;
-
-		  float ms = duration.count() * 1000.0f;
-		  std::cout << "Process took" << ms << "ms" << std::endl;
-	 }
-};
+#include <cassert>
+#include "src/benchmark.h"
+#include "src/fecs.h"
+#include "src/sparse_set.h"
 
 int main() {
-    // initialize fecs
-    FECS ecs;
-	 
-	 int sample = 100;
-	 for (int i = 0; i < sample; i++) {
-		  auto e1 = ecs.add_entity();
-		  ecs.add<Position>(e1, Position(0.0f, 0.0f));
-	 }
+	SparseSet<int> set;
 
+	// sparse set insert
+	int sample = 1000;
+	{
+		Benchmark timer;
+		
+		for (int i = 0; i < sample; i++) {
+			set.insert(i, 32 * i);
+		}
+		std::cout << "Sparse Set Insert (" + std::to_string(sample) + "), ";
+		// 0.024ms avg
+	}
 
-	 Timer timer;
+	// sparse set get
+	{
+		Benchmark timer;
+		for (int i = 0; i < sample; i++) {
+			set.get(i);
+		}
+		std::cout << "Sparse Set Get (" + std::to_string(sample) + "), ";
+		// 0.00033ms avg
+	}
 
-	 ecs.query_system<Position>([&](EntityID id, Position& position) {
-	 });
+	// fecs entity create
+	FECS fecs;
+	{
+		Benchmark timer;
+		for (int i = 0; i < sample; i++) {
+			fecs.create_entity();
+		}
 
-	 ecs.query_system<Position>([&](EntityID id, Position& position) {
-	 });
+		std::cout << "FECS Entity Create (" + std::to_string(sample) + "), ";
+		// 0.03ms avg
+	}
+	
+	// fecs component insert
+	{
+		Benchmark timer;
+		for (int i = 0; i < sample; i++) {
+			fecs.attach<int>(i, 32 * i);
+		}
 
-	 ecs.query_system<Position>([&](EntityID id, Position& position) {
-	 });
+		std::cout << "FECS Component Attach (" + std::to_string(sample) + "), ";
+		// 0.04ms avg
+	}
+	
+	// fecs get
+	{
+		Benchmark timer;
+		for (int i = 0; i < sample; i++) {
+			fecs.get<int>(i);
+		}
 
-	 ecs.terminate();
+		std::cout << "FECS Component Get (" + std::to_string(sample) + "), ";
+		// 0.007ms avg
+	}
+	
+	// fecs query
+	{
+		Benchmark timer;
+		fecs.query<int>([](Entity id, int& i) {
 
-    return 0;
+		});
+
+		std::cout << "FECS Query (1 Component, 1000 Entities)";
+		// 0.0076ms avg
+	}
 }
