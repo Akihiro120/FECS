@@ -1,3 +1,0 @@
-/Users/akihiro/Desktop/FECS/build/CMakeFiles/FECS.dir
-/Users/akihiro/Desktop/FECS/build/CMakeFiles/edit_cache.dir
-/Users/akihiro/Desktop/FECS/build/CMakeFiles/rebuild_cache.dir
