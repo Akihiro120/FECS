@@ -1,99 +1,84 @@
-# Functional Entity Component System (FECS)
+FECS - A Lightweight Entity Component System
 
-A lighweight and flexible Entity Component System (ECS) single header framework built for flexibility and high-performance game development. This framework provides an efficient way to manage entities, components, and systems.
+FECS is a lightweight, header-only Entity Component System (ECS) written in modern c++. It leverages a custom sparse set data structure to acheieve near constant-time insertion, removal and retrieval of components. FECS has been designed with clarity and efficiency in mind, suitable for small-to-medium projects and for educational purposes.
 
-FECS utilises complex data structures like, sparse sets, and bitsets to allow for fast entity querying, and creation.
-
-> [!WARNING]
-> This is made to fit the needs of my projects, if something isn't right or needs implementation, create an **Issue**.
+--
 
 ### Features
 - **Entity Management**
-- **Component-Based Design**
-- **Flexible System Processing**
-- **Efficient Memory Layout**
+    Simple Interface for creating and removing entities with unique IDs.
+- **Component Storage via Sparse Set**
+    Utilises a fixed-sized sparse set for O(1) access and update, minimising memory overhead.
+- **Flexible Component Attachment**
+    Attach and Detach components to/from entities via a templated API, using `std::bitset` to track component signatures
+- **Query System**
+    Query entities that match a given set of components types with an elegant template-based parameter pack.
+- **Modern C++ Techniques**
+    Uses templates, assertions, and RAII for robust maintainable code.
 
-### Table of Contents
-- Wrappers
-- Getting Started
-- Benchmark
-- Usage
-    - Entities
-    - Components
-    - Systems
- 
-### Wrappers
----
-|                                       | Language |
-| --------------------------------------| :------: |
-| https://github.com/Akihiro120/FECS-rs | Rust     |
+--
 
 ### Getting Started
----
-Download the (latest release)[https://github.com/Akihiro120/FECS/releases/tag/v1.0.1].
+#### Prerequisites
+- A C++ 17 compliant compiler.
+- Basic understanding of C++ templates and the ECS design pattern.
 
-Include the FECS library, ```#include <FECS.h>```
+#### Installation
+FECS is header-only. Simply clone the repository and include the relevant headers in your project:
+``` bash
+git clone https://github.com/Akihiro120/FECS.git
+```
 
-Initialize the FECS context
+Then, in your C++ source file:
+``` bash
+#include "fecs.h"
+```
+
+-- 
+### Usage
+#### Preprocessors
+You can define and change the MAX size for the Sparse, and the MAX number of components for FECS.
 ``` c++
-FECS fecs;
-
-// .. insert code here
-
-fecs.terminate();
+#define MAX_SPARSE_SIZE 2000
+#define MAX_COMPONENTS 100
 ```
-
-### Usage - Entities
----
-Entities are uint32_t IDs.
-
+#### Creating an Entity
 ``` c++
-EntityID entity = fecs.add_entity();
+FECS ecs;
+Entity entity = ecs.create_entity();
 ```
-
-### Usage - Components
-To create a component, you create a class/struct and inherit the **Component** base structure.
-
-```
-struct Position : public Component {
-    float x;
-    float y;
-
-    Position(float x, float y) {
-        this->x = x;
-        this->y = y;
-    }
+#### Attaching a Component
+Define a component type (e.g. a struct) and attach it to an entity:
+``` c++
+struct Position {
+    float x, y;
 };
+
+ecs.attach<Position>(entity, {10.0f, 20.0f});
 ```
-
-You can then attach a component to an entity
-
+#### Detaching a Component
 ``` c++
-fecs.add<Position>(entity, Position{0.0f, 0.0f});
+ecs.detach<Position>(entity);
 ```
-
-You can remove with
+#### Accessing a Component
 ``` c++
-fecs.remove<Position>(entity);
+Position* pos = ecs.get<Position>(entity);
+if (pos) {
+    // use *pos
+}
 ```
-
-An entity can only have one of any component type.
-
-### Usage - Systems
----
-For systems, its a unique and functional process. There is no concept of a system class.
-
-To create a system, you have to query components, then use a lambda function to utilize it.
-
+#### Querying Entities
+Iterate over entities with specific components using the query interface:
 ``` c++
-ecs.query_system<Position, Velocity>(
-    [&](EntityID id, Position& pos, Velocity& vel) {
-    // apply function
-    pos.x += vel.x;
-    pos.y += vel.y;
+ecs.query<Position, Velocity>([](Entity e, Position& pos, Velocity& vel) {
+    // process entity e and its Position and Velocity Component
 });
 ```
 
-This allows for flexible and functional system management and creation.
+--
+### Contributing
+Contributions to FECS are most welcome. If you have ideas for improvement or have identified any issues, please open an issue or submit a pull request. When contributing, please maintain the current academic tone and clarity of documentation.
 
-You must always include the EntityID as a lambda parameter.
+--
+### License
+This project is licensed under the MIT Licence – see the LICENCE file for details.

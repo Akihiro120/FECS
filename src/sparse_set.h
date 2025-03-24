@@ -9,6 +9,7 @@
 class ISparseSet {
 public:
 	ISparseSet() = default;
+
 	virtual void remove(size_t index) = 0;
 };
 
@@ -69,7 +70,7 @@ public:
 	}
 
 	// READ ONLY
-	std::vector<T> get_all() {
+	const std::vector<T>& get_all() const noexcept {
 		return mDense;
 	}
 

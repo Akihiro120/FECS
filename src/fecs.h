@@ -13,7 +13,7 @@ public:
 	FECS() {}
 	~FECS() {}
 
-	Entity create_entity() {
+	Entity create_entity() noexcept {
 		Entity id;
 		if (mFreeEntities.empty()) {
 			mNextID++;
