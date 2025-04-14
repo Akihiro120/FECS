@@ -22,7 +22,7 @@ public:
 	}
 
 	void insert(size_t index, T entry) {
-		assert(MAX_SPARSE_SIZE > index);
+		assert(index < MAX_SPARSE_SIZE);
 
 		if (contains(index)) {
 			// replace
@@ -38,7 +38,7 @@ public:
 	}
 
 	virtual void remove(size_t sparse_index) override {
-		assert(MAX_SPARSE_SIZE > sparse_index);
+		assert(sparse_index < MAX_SPARSE_SIZE);
 
 		if (!contains(sparse_index)) {
 			return;
@@ -58,7 +58,7 @@ public:
 	}
 
 	T* get(size_t index) {
-		assert(MAX_SPARSE_SIZE > index);
+		assert(index < MAX_SPARSE_SIZE);
 
 		// get the entry at index
 		if (!contains(index)) {
@@ -82,7 +82,7 @@ private:
 	size_t INVALID_INDEX = std::numeric_limits<size_t>::max();
 
 	bool contains(size_t index) {
-		assert(MAX_SPARSE_SIZE > index);
+		// assert(mSparse.size() > index);
 
 		return mSparse[index] != INVALID_INDEX && mDenseIndices[mSparse[index]] == index;
 	}
