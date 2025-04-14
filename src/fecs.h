@@ -116,13 +116,18 @@ public:
 		(required_bits.set(mCSignature[typeid(C)]), ...);
 
 		// get the entities
+		std::vector<Entity> entities_queried;
 		for (auto& sets : mSignatures) {
 			if ((sets.first & required_bits) == required_bits) {
 				// get the entities
-				for (auto entities : sets.second.get_all()) {
-					fn(entities, *get<C>(entities)...);
+				for (Entity entities : sets.second.get_all()) {
+					entities_queried.push_back(entities);
 				}
 			}
+		}
+
+		for (auto& entities : entities_queried) {
+			fn(entities, *get<C>(entities)...);
 		}
 	}
 
