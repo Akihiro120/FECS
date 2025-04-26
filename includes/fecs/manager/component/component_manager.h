@@ -3,6 +3,11 @@
 #include <unordered_map>
 #include <fecs/containers/sparse/sparse_set.hpp>
 
+/**
+ * @brief Manages components associated with entities.
+ *
+ * Provides methods to attach, detach, and retrieve components of various types for entities identified by their unique IDs.
+ */
 namespace FECS
 {
     class Entity;

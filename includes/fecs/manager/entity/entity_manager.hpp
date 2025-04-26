@@ -15,7 +15,12 @@ namespace FECS
         {
         public:
             EntityManager(Registry& registry);
-            ~EntityManager() = default;
+            /**
+ * @brief Destroys the EntityManager instance.
+ *
+ * Releases resources held by the EntityManager. Does not affect the associated Registry or managed entities.
+ */
+~EntityManager() = default;
 
             FECS::Entity CreateEntity();
             void DestroyEntity(FECS::Entity& entity);

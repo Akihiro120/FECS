@@ -16,7 +16,12 @@ namespace FECS
     {
     public:
         Entity(Registry& registry, Manager::EntityManager& entityManager);
-        ~Entity() = default;
+        /**
+ * @brief Destroys the Entity instance.
+ *
+ * Cleans up the Entity object. Does not perform additional resource management beyond default destruction.
+ */
+~Entity() = default;
 
         std::uint32_t GetID() const;
         void SetID(std::uint32_t id);

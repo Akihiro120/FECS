@@ -8,7 +8,12 @@ namespace FECS::Container
     class ISparseSet
     {
     public:
-        virtual ~ISparseSet() = default;
+        /**
+ * @brief Virtual destructor for ISparseSet.
+ *
+ * Ensures proper cleanup of derived sparse set implementations.
+ */
+virtual ~ISparseSet() = default;
         virtual void Remove(const SparseIndex& index) = 0;
         virtual bool Contains(const SparseIndex& index) const = 0;
         virtual void Resize(std::size_t size) = 0;
@@ -21,11 +26,26 @@ namespace FECS::Container
     {
     public:
         SparseSet(std::size_t size = 1000);
-        ~SparseSet() = default;
+        /**
+ * @brief Destroys the SparseSet and releases its resources.
+ */
+~SparseSet() = default;
 
-        // copy and assignment operators
+        /**
+ * @brief Creates a copy of another SparseSet instance.
+ *
+ * Performs a shallow copy of the internal storage and mappings from the given SparseSet.
+ */
         SparseSet(const SparseSet& other) = default;
-        SparseSet& operator=(const SparseSet& other) = default;
+        /**
+ * @brief Assigns the contents of another SparseSet to this one.
+ *
+ * Replaces all elements and internal mappings with those from the given SparseSet.
+ * Performs a shallow copy of the stored elements and index mappings.
+ *
+ * @return Reference to this SparseSet.
+ */
+SparseSet& operator=(const SparseSet& other) = default;
 
         void Insert(const SparseIndex& index, const T& value);
         virtual void Remove(const SparseIndex& index) override;

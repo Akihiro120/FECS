@@ -8,6 +8,13 @@ struct Position
     float y;
 };
 
+/**
+ * @brief Demonstrates basic usage of the FECS entity-component system.
+ *
+ * Creates entities, attaches components of various types, retrieves and prints component values, and handles exceptions that may occur during component access.
+ *
+ * @return int Exit status code.
+ */
 int main()
 {
     try
