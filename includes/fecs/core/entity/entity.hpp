@@ -20,12 +20,16 @@ namespace FECS
 
         std::uint32_t GetID() const;
         void SetID(std::uint32_t id);
-        bool IsValid();
+        bool IsValid() const;
 
         void Destroy();
 
         template <typename Component>
-        void AttachComponent(const Component& component);
+        Entity& AttachComponent(const Component& component);
+        template <typename Component>
+        Entity& DetachComponent();
+        template <typename Component>
+        Component& Get();
 
         // Operators
         operator std::uint32_t() const;
