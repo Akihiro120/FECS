@@ -21,7 +21,7 @@ namespace FECS
         m_ID = id;
     }
 
-    bool Entity::IsValid()
+    bool Entity::IsValid() const
     {
         return m_ID != INVALID_ENTITY_INDEX;
     }
