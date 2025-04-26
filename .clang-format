@@ -1,4 +1,4 @@
-BasedOnStyle: LLVM
+BasedOnStyle: Microsoft
 IndentWidth: 4
 UseTab: Never
 AccessModifierOffset: -4
@@ -13,5 +13,4 @@ SortIncludes: false
 AlwaysBreakTemplateDeclarations: Yes
 DerivePointerAlignment: false
 PointerAlignment: Left
-CommentNamespace: false
-
+FixNamespaceComments: false
