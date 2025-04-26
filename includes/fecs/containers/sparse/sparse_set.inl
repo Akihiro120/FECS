@@ -1,8 +1,3 @@
-#pragma once
-#include "sparse_set.hpp"
-#include <vector>
-#include <cassert>
-
 namespace FECS::Container
 {
 
@@ -14,7 +9,7 @@ namespace FECS::Container
     }
 
     template <typename T>
-    void SparseSet<T>::Insert(const SparseIndex &index, const T &value)
+    void SparseSet<T>::Insert(const SparseIndex& index, const T& value)
     {
         assert(IsValidIndex(index) && "SparseSet->Insert: Index out of Bounds");
 
@@ -32,7 +27,7 @@ namespace FECS::Container
     }
 
     template <typename T>
-    void SparseSet<T>::Remove(const SparseIndex &index)
+    void SparseSet<T>::Remove(const SparseIndex& index)
     {
         assert(IsValidIndex(index) && "SparseSet->Remove: Index out of Bounds");
 
@@ -54,7 +49,7 @@ namespace FECS::Container
     }
 
     template <typename T>
-    bool SparseSet<T>::Contains(const SparseIndex &index) const
+    bool SparseSet<T>::Contains(const SparseIndex& index) const
     {
         return m_Sparse[index] != INVALID_SPARSE_INDEX &&
                m_Sparse[index] < m_DenseToSparse.size() &&
@@ -62,7 +57,7 @@ namespace FECS::Container
     }
 
     template <typename T>
-    T *SparseSet<T>::Get(const SparseIndex &index)
+    T* SparseSet<T>::Get(const SparseIndex& index)
     {
         assert(IsValidIndex(index) && "SparseSet->Get: Index out of Bounds");
 
@@ -95,13 +90,13 @@ namespace FECS::Container
     }
 
     template <typename T>
-    const std::vector<T> &SparseSet<T>::GetAll() const noexcept
+    const std::vector<T>& SparseSet<T>::GetAll() const noexcept
     {
         return m_Dense;
     }
 
     template <typename T>
-    bool SparseSet<T>::IsValidIndex(const SparseIndex &index) const
+    bool SparseSet<T>::IsValidIndex(const SparseIndex& index) const
     {
         return index < m_Sparse.size();
     }

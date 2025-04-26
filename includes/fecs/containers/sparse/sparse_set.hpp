@@ -1,6 +1,6 @@
 #pragma once
-#include <vector>
 #include <fecs/core/core.hpp>
+#include <vector>
 
 namespace FECS::Container
 {
@@ -34,6 +34,6 @@ namespace FECS::Container
         std::vector<SparseIndex> m_DenseToSparse;
     };
 
-}
+} // namespace FECS::Container
 
 #include "sparse_set.inl"
