@@ -1,6 +1,13 @@
 #include <fecs/manager/component/component_manager.h>
 
-namespace FECS::Manager
+namespace FECS
 {
 
+    namespace Manager
+    {
+
+        ComponentManager::ComponentManager()
+        {
+        }
+    }
 }
