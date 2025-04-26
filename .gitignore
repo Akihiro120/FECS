@@ -2,4 +2,3 @@
 build/
 run
 .DS_Store
-main.cpp
