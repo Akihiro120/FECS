@@ -1,10 +1,3 @@
 #pragma once
-
-namespace FECS {
-
-class World {
-public:
-	World();
-	~World();
-};
-}
+#include <fecs/registry/registry.hpp>
+#include <fecs/core/entity/entity.hpp>
