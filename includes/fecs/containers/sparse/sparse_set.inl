@@ -1,3 +1,8 @@
+#pragma once
+#include <fecs/containers/sparse/sparse_set.hpp>
+#include <cassert>
+#include <stdexcept>
+
 namespace FECS::Container
 {
 
@@ -11,7 +16,10 @@ namespace FECS::Container
     template <typename T>
     void SparseSet<T>::Insert(const SparseIndex& index, const T& value)
     {
-        assert(IsValidIndex(index) && "SparseSet->Insert: Index out of Bounds");
+        if (!IsValidIndex(index))
+        {
+            throw std::runtime_error("SparseSet->Insert: Index out of Bounds");
+        }
 
         if (Contains(index))
         {
@@ -29,7 +37,10 @@ namespace FECS::Container
     template <typename T>
     void SparseSet<T>::Remove(const SparseIndex& index)
     {
-        assert(IsValidIndex(index) && "SparseSet->Remove: Index out of Bounds");
+        if (!IsValidIndex(index))
+        {
+            throw std::runtime_error("SparseSet->Remove: Index out of Bounds");
+        }
 
         if (Contains(index))
         {
@@ -51,22 +62,26 @@ namespace FECS::Container
     template <typename T>
     bool SparseSet<T>::Contains(const SparseIndex& index) const
     {
-        return m_Sparse[index] != INVALID_SPARSE_INDEX &&
-               m_Sparse[index] < m_DenseToSparse.size() &&
-               m_DenseToSparse[m_Sparse[index]] == index;
+        std::uint32_t sparseIndex = m_Sparse[index];
+        return sparseIndex != INVALID_SPARSE_INDEX &&
+               sparseIndex < m_DenseToSparse.size() &&
+               m_DenseToSparse[sparseIndex] == index;
     }
 
     template <typename T>
     T* SparseSet<T>::Get(const SparseIndex& index)
     {
-        assert(IsValidIndex(index) && "SparseSet->Get: Index out of Bounds");
+        if (!IsValidIndex(index))
+        {
+            throw std::runtime_error("SparseSet->Get: Index out of Bounds");
+        }
 
         if (Contains(index))
         {
             return &m_Dense[m_Sparse[index]];
         }
 
-        return nullptr;
+        throw std::runtime_error("SparseSet->Get: Element not Found");
     }
 
     template <typename T>
@@ -100,4 +115,4 @@ namespace FECS::Container
     {
         return index < m_Sparse.size();
     }
-} // namespace FECS::Container
+}

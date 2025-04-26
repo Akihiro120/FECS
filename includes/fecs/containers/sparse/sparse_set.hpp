@@ -5,8 +5,19 @@
 namespace FECS::Container
 {
 
+    class ISparseSet
+    {
+    public:
+        virtual ~ISparseSet() = default;
+        virtual void Remove(const SparseIndex& index) = 0;
+        virtual bool Contains(const SparseIndex& index) const = 0;
+        virtual void Resize(std::size_t size) = 0;
+        virtual void Clear() noexcept = 0;
+        virtual bool IsValidIndex(const SparseIndex& index) const = 0;
+    };
+
     template <typename T>
-    class SparseSet
+    class SparseSet : public ISparseSet
     {
     public:
         SparseSet(std::size_t size = 1000);
@@ -17,16 +28,16 @@ namespace FECS::Container
         SparseSet& operator=(const SparseSet& other) = default;
 
         void Insert(const SparseIndex& index, const T& value);
-        void Remove(const SparseIndex& index);
-        bool Contains(const SparseIndex& index) const;
-        void Resize(std::size_t size);
-        void Clear() noexcept;
+        virtual void Remove(const SparseIndex& index) override;
+        virtual bool Contains(const SparseIndex& index) const override;
+        virtual void Resize(std::size_t size) override;
+        virtual void Clear() noexcept override;
 
         T* Get(const SparseIndex& index);
         const std::vector<T>& GetAll() const noexcept;
 
     private:
-        bool IsValidIndex(const SparseIndex& index) const;
+        virtual bool IsValidIndex(const SparseIndex& index) const override;
 
         // members
         std::vector<T> m_Dense;
@@ -34,6 +45,6 @@ namespace FECS::Container
         std::vector<SparseIndex> m_DenseToSparse;
     };
 
-} // namespace FECS::Container
+}
 
 #include "sparse_set.inl"
