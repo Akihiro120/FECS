@@ -1,7 +1,8 @@
 #pragma once
 #include <typeindex>
+#include <memory>
 #include <unordered_map>
-#include <fecs/containers/sparse/sparse_set.hpp>
+#include <fecs/containers/sparse/sparse_set.h>
 
 namespace FECS
 {
@@ -9,11 +10,16 @@ namespace FECS
 
     namespace Manager
     {
+        class QueryManager;
+    }
+
+    namespace Manager
+    {
 
         class ComponentManager
         {
         public:
-            ComponentManager();
+            ComponentManager(QueryManager& queryManager);
             ~ComponentManager() = default;
 
             template <typename Component>
@@ -25,7 +31,13 @@ namespace FECS
             template <typename Component>
             Component& Get(std::uint32_t id);
 
+            template <typename Component>
+            bool Has(std::uint32_t id);
+
+            void RemoveEntity(std::uint32_t id);
+
         private:
+            QueryManager& m_QueryManagerReference;
             std::unordered_map<std::type_index, std::unique_ptr<Container::ISparseSet>> m_ComponentPool;
         };
     }
