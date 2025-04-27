@@ -1,3 +1,3 @@
 #pragma once
-#include <fecs/registry/registry.hpp>
-#include <fecs/core/entity/entity.hpp>
+#include <fecs/registry/registry.h>
+#include <fecs/core/entity/entity.h>
