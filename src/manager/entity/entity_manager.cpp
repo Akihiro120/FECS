@@ -1,6 +1,7 @@
-#include <fecs/manager/entity/entity_manager.hpp>
-#include <fecs/core/entity/entity.hpp>
-#include <fecs/registry/registry.hpp>
+#include <fecs/manager/entity/entity_manager.h>
+#include <fecs/core/entity/entity.h>
+#include <fecs/manager/component/component_manager.h>
+#include <fecs/registry/registry.h>
 
 namespace FECS
 {
@@ -8,8 +9,10 @@ namespace FECS
     namespace Manager
     {
 
-        EntityManager::EntityManager(FECS::Registry& registry)
-            : m_RegistryReference(registry)
+        EntityManager::EntityManager(FECS::Registry& registry, QueryManager& queryManager, ComponentManager& componentManager)
+            : m_RegistryReference(registry),
+              m_QueryManagerReference(queryManager),
+              m_ComponentManagerReference(componentManager)
         {
         }
 
@@ -22,21 +25,26 @@ namespace FECS
             {
                 newEntity.SetID(m_FreeID[0]);
                 m_FreeID.pop_back();
-
-                return newEntity;
+            }
+            else
+            {
+                // give new id
+                newEntity.SetID(++m_NextID);
             }
 
-            // give new id
-            newEntity.SetID(++m_NextID);
+            // give a signature
+            m_QueryManagerReference.CreateEntitySignature(newEntity.GetID());
 
             return newEntity;
         }
 
         void EntityManager::DestroyEntity(FECS::Entity& entity)
         {
-            m_FreeID.push_back(entity.GetID());
+            m_QueryManagerReference.RemoveEntitySignature(entity.GetID());
+            m_ComponentManagerReference.RemoveEntity(entity.GetID());
 
-            entity.SetID(std::numeric_limits<std::uint32_t>::max());
+            m_FreeID.push_back(entity.GetID());
+            entity.SetID(INVALID_ENTITY_INDEX);
         }
     }
 }
