@@ -1,6 +1,6 @@
-#include "fecs/core/core.hpp"
-#include <fecs/core/entity/entity.hpp>
-#include <fecs/manager/entity/entity_manager.hpp>
+#include "fecs/core/core.h"
+#include <fecs/core/entity/entity.h>
+#include <fecs/manager/entity/entity_manager.h>
 
 namespace FECS
 {
