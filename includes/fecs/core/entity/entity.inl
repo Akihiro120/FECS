@@ -1,6 +1,6 @@
 #pragma once
-#include <fecs/core/entity/entity.hpp>
-#include <fecs/registry/registry.hpp>
+#include <fecs/core/entity/entity.h>
+#include <fecs/registry/registry.h>
 
 namespace FECS
 {
@@ -23,5 +23,11 @@ namespace FECS
     inline Component& Entity::Get()
     {
         return m_RegistryReference.Get<Component>(*this);
+    }
+
+    template <typename Component>
+    inline bool Entity::Has()
+    {
+        return m_RegistryReference.Has<Component>(*this);
     }
 }
