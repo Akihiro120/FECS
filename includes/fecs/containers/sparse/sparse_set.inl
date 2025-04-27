@@ -1,5 +1,5 @@
 #pragma once
-#include <fecs/containers/sparse/sparse_set.hpp>
+#include <fecs/containers/sparse/sparse_set.h>
 #include <cassert>
 #include <stdexcept>
 

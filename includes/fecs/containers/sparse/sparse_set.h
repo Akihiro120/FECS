@@ -1,5 +1,5 @@
 #pragma once
-#include <fecs/core/core.hpp>
+#include <fecs/core/core.h>
 #include <vector>
 
 namespace FECS::Container
