@@ -9,7 +9,7 @@ include_directories(${FECS_INCLUDE_DIRS})
 file (GLOB_RECURSE FECS_SOURCES
 	 src/*.cpp
 )
-# add_library(FECS ${FECS_SOURCES})
+# add_library(FECS STATIC ${FECS_SOURCES})
 add_executable(FECS main.cpp ${FECS_SOURCES})
 
 target_include_directories(FECS PUBLIC ${FECS_INCLUDE_DIRS})
