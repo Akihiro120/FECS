@@ -1,6 +1,5 @@
 #include <iostream>
 #include <fecs/fecs.hpp>
-#include <fecs/core/entity/entity.hpp>
 
 struct Position
 {
@@ -29,7 +28,12 @@ int main()
         std::cout << e1.Get<Position>().x << " " << e1.Get<Position>().y << std::endl;
         std::cout << e1.Get<std::uint32_t>() << std::endl;
 
-        e0.Get<Position>();
+        registry.Each<std::uint32_t, Position>([](std::uint32_t id, std::uint32_t& value, Position& pos)
+        {
+            std::cout << "Entity: " << id << std::endl;
+            std::cout << pos.x << " " << pos.y << std::endl;
+            std::cout << value << std::endl;
+        });
     }
     catch (std::exception e)
     {
