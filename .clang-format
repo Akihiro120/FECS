@@ -1,0 +1,17 @@
+BasedOnStyle: Microsoft
+IndentWidth: 4
+UseTab: Never
+AccessModifierOffset: -4
+AllowShortFunctionsOnASingleLine: Empty
+BreakBeforeBraces: Allman
+NamespaceIndentation: All
+ColumnLimit: 0
+SpacesInAngles: false
+SpaceAfterCStyleCast: true
+Cpp11BracedListStyle: true
+SortIncludes: false
+AlwaysBreakTemplateDeclarations: Yes
+DerivePointerAlignment: false
+PointerAlignment: Left
+FixNamespaceComments: false
+LambdaBodyIndentation: OuterScope

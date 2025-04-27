@@ -1,75 +1,44 @@
-#include <cassert>
-#include "src/benchmark.h"
-#include "src/fecs.h"
-#include "src/sparse_set.h"
+#include <iostream>
+#include <fecs/fecs.hpp>
 
-int main() {
-	SparseSet<int> set;
+struct Position
+{
+    float x;
+    float y;
+};
 
-	// sparse set insert
-	int sample = 1000;
-	{
-		Benchmark timer;
-		
-		for (int i = 0; i < sample; i++) {
-			set.insert(i, 32 * i);
-		}
-		std::cout << "Sparse Set Insert (" + std::to_string(sample) + "), ";
-		// 0.024ms avg
-	}
+int main()
+{
+    try
+    {
+        FECS::Registry registry;
 
-	// sparse set get
-	{
-		Benchmark timer;
-		for (int i = 0; i < sample; i++) {
-			set.get(i);
-		}
-		std::cout << "Sparse Set Get (" + std::to_string(sample) + "), ";
-		// 0.00033ms avg
-	}
+        FECS::Entity e0 = registry.CreateEntity();
 
-	// fecs entity create
-	FECS fecs;
-	{
-		Benchmark timer;
-		for (int i = 0; i < sample; i++) {
-			fecs.create_entity();
-		}
+        registry.AttachComponent<std::uint32_t>(e0, 32);
+        e0.AttachComponent<float>(64.0f);
 
-		std::cout << "FECS Entity Create (" + std::to_string(sample) + "), ";
-		// 0.03ms avg
-	}
-	
-	// fecs component insert
-	{
-		Benchmark timer;
-		for (int i = 0; i < sample; i++) {
-			fecs.attach<int>(i, 32 * i);
-		}
+        std::cout << e0.Get<float>() << std::endl;
+        std::cout << e0.Get<std::uint32_t>() << std::endl;
 
-		std::cout << "FECS Component Attach (" + std::to_string(sample) + "), ";
-		// 0.04ms avg
-	}
-	
-	// fecs get
-	{
-		Benchmark timer;
-		for (int i = 0; i < sample; i++) {
-			fecs.get<int>(i);
-		}
+        FECS::Entity e1 = registry.CreateEntity();
+        e1.AttachComponent<Position>({12.23f, 23.5f})
+            .AttachComponent<std::uint32_t>(12);
 
-		std::cout << "FECS Component Get (" + std::to_string(sample) + "), ";
-		// 0.007ms avg
-	}
-	
-	// fecs query
-	{
-		Benchmark timer;
-		fecs.query<int>([](Entity id, int& i) {
+        std::cout << e1.Get<Position>().x << " " << e1.Get<Position>().y << std::endl;
+        std::cout << e1.Get<std::uint32_t>() << std::endl;
 
-		});
+        registry.Each<std::uint32_t, Position>([](std::uint32_t id, std::uint32_t& value, Position& pos)
+        {
+            std::cout << "Entity: " << id << std::endl;
+            std::cout << pos.x << " " << pos.y << std::endl;
+            std::cout << value << std::endl;
+        });
+    }
+    catch (std::exception e)
+    {
+        std::cout << e.what() << std::endl;
+    }
 
-		std::cout << "FECS Query (1 Component, 1000 Entities)";
-		// 0.0076ms avg
-	}
+    return 0;
 }

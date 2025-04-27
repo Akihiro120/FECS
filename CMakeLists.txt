@@ -1,15 +1,15 @@
 cmake_minimum_required(VERSION 3.25)
 project(FECS)
 
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
-set(CMAKE_C_FLAGS_RELEASE   "-O3 -DNDEBUG")
-set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG")
+set(CMAKE_CXX_STANDARD 23)
 
-file (GLOB_RECURSE source
-    "src/*.h"
-    "src/*.cpp"
+set(FECS_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/includes)
+include_directories(${FECS_INCLUDE_DIRS})
+
+file (GLOB_RECURSE FECS_SOURCES
+	 src/*.cpp
 )
+# add_library(FECS STATIC ${FECS_SOURCES})
+add_executable(FECS main.cpp ${FECS_SOURCES})
 
-add_executable(${PROJECT_NAME} main.cpp ${source})
+target_include_directories(FECS PUBLIC ${FECS_INCLUDE_DIRS})
