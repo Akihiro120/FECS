@@ -1,11 +1,13 @@
-#include <fecs/registry/registry.hpp>
-#include <fecs/core/entity/entity.hpp>
+#include <fecs/registry/registry.h>
+#include <fecs/core/entity/entity.h>
 
 namespace FECS
 {
 
     Registry::Registry()
-        : m_EntityManager(*this)
+        : m_EntityManager(*this, m_QueryManager, m_ComponentManager),
+          m_ComponentManager(m_QueryManager),
+          m_QueryManager(m_ComponentManager)
     {
     }
 
