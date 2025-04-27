@@ -14,3 +14,4 @@ AlwaysBreakTemplateDeclarations: Yes
 DerivePointerAlignment: false
 PointerAlignment: Left
 FixNamespaceComments: false
+LambdaBodyIndentation: OuterScope
