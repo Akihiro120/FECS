@@ -1,38 +1,55 @@
 #pragma once
+#include <fecs/core/types.h>
 #include <vector>
-#include <fecs/core/core.h>
+#include <stdexcept>
 
 namespace FECS
 {
-
-    class Entity;
-    class Registry;
-
     namespace Manager
     {
-        class QueryManager;
-        class ComponentManager;
-    }
-
-    namespace Manager
-    {
-
         class EntityManager
         {
         public:
-            EntityManager(Registry& registry, QueryManager& queryManager, ComponentManager& componentManager);
+            EntityManager()
+            {
+                m_FreeIDs.reserve(ENTITY_MINIMUM);
+            }
             ~EntityManager() = default;
 
-            FECS::Entity CreateEntity();
-            void DestroyEntity(FECS::Entity& entity);
+            Entity CreateEntity()
+            {
+                if (!m_FreeIDs.empty())
+                {
+                    Entity id = INVALID_ENTITY;
+                    id = m_FreeIDs.back();
+                    m_FreeIDs.pop_back();
+                    return id;
+                }
+
+                Entity id = m_NextID;
+                m_NextID++;
+                return id;
+            }
+
+            void DestroyEntity(Entity& entity)
+            {
+                if (entity == INVALID_ENTITY)
+                {
+                    throw std::runtime_error("FECS::Entity::Remove: Cannot Remove Invalid Entity");
+                }
+
+                m_FreeIDs.emplace_back(entity);
+                entity = INVALID_ENTITY;
+            }
+
+            std::size_t Size()
+            {
+                return m_NextID - m_FreeIDs.size();
+            }
 
         private:
-            std::uint32_t m_NextID = 0;
-            std::vector<std::uint32_t> m_FreeID;
-
-            Registry& m_RegistryReference;
-            QueryManager& m_QueryManagerReference;
-            ComponentManager& m_ComponentManagerReference;
+            std::vector<Entity> m_FreeIDs;
+            Entity m_NextID = 0;
         };
     }
 }
