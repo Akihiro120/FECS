@@ -1,0 +1,5 @@
+set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG")
+set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g -DNDEBUG")
+set(CMAKE_CXX_FLAGS_MINSIZEREL "-Os -DNDEBUG")
+add_executable(Benchmark main.cpp)
+# target_link_libraries(Benchmark FECS)
