@@ -15,7 +15,7 @@
 
 namespace FECS
 {
-    using SparseIndex = std::size_t;
+    using SparseIndex = std::uint32_t;
     using Entity = std::size_t;
     using ComponentBit = std::size_t;
 

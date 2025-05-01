@@ -11,15 +11,10 @@ namespace FECS::Container
     {
     public:
         virtual ~ISparseSet() = default;
-        virtual void Remove(const SparseIndex& index) = 0;
-        virtual bool Contains(const SparseIndex& index) const = 0;
-        virtual void Resize(std::size_t size) = 0;
-        virtual void Clear() noexcept = 0;
-        virtual bool IsValidIndex(const SparseIndex& index) const = 0;
-        virtual std::size_t Size() = 0;
+        virtual void Remove(SparseIndex index) = 0;
     };
 
-    template <typename T, std::size_t Alignment = 64>
+    template <typename T>
     class SparseSet : public ISparseSet
     {
     public:
@@ -39,91 +34,97 @@ namespace FECS::Container
         SparseSet(const SparseSet& other) = default;
         SparseSet& operator=(const SparseSet& other) = default;
 
-        void Insert(const SparseIndex& index, T&& value)
+        void Insert(SparseIndex index, T&& value)
         {
             if (index >= m_Sparse.size())
             {
                 m_Sparse.resize(index + 1, INVALID_SPARSE_INDEX);
             }
 
-            // Direct lookup instead of calling contains()
-            const std::size_t sparseIndex = m_Sparse[index];
-
-            // Check if item exists
+            const SparseIndex sparseIndex = m_Sparse[index];
             if (sparseIndex != INVALID_SPARSE_INDEX &&
-                sparseIndex < m_DenseToSparse.size() &&
                 m_DenseToSparse[sparseIndex] == index)
             {
-                // Replace existing item with moved value
-                m_Dense[sparseIndex] = std::move(value);
                 return;
             }
 
-            // Reserve space if we're approaching capacity
-            if (m_Dense.size() == m_Dense.capacity())
-            {
-                m_Dense.reserve(m_Dense.capacity() * 2);
-                m_DenseToSparse.reserve(m_DenseToSparse.capacity() * 2);
-            }
-
             // Insert new item with move
-            m_Dense.push_back(std::move(value));
+            m_Dense.emplace_back(std::move(value));
             m_DenseToSparse.emplace_back(index);
             m_Sparse[index] = m_Dense.size() - 1;
         }
 
-        virtual void Remove(const SparseIndex& index) override
+        template <typename Container>
+        void BatchInsert(const Container& items)
+        {
+            if (items.empty())
+                return;
+
+            SparseIndex maxIndex = 0;
+            for (const auto& [index, _] : items)
+            {
+                maxIndex = std::max(maxIndex, index);
+            }
+
+            // Resize once
+            EnsureCapacity(maxIndex);
+
+            const std::size_t newSize = m_Dense.size() + items.size();
+            m_Dense.reserve(newSize);
+            m_DenseToSparse.reserve(newSize);
+
+            for (const auto& [index, value] : items)
+            {
+                const SparseIndex sparseIndex = m_Sparse[index];
+                if (sparseIndex != INVALID_SPARSE_INDEX &&
+                    m_DenseToSparse[sparseIndex] == index)
+                    continue;
+
+                m_Dense.emplace_back(std::move(value));
+                m_DenseToSparse.emplace_back(index);
+                m_Sparse[index] = static_cast<SparseIndex>(m_Dense.size() - 1);
+            }
+        }
+
+        virtual void Remove(SparseIndex index) override
         {
             if (!IsValidIndex(index))
             {
-                throw std::runtime_error("SparseSet->Remove: Index out of Bounds");
+                throw std::runtime_error("SparseSet->Remove: Invalid Index");
             }
 
-            const std::size_t sparseIndex = m_Sparse[index];
+            const SparseIndex sparseIndex = m_Sparse[index];
+            const SparseIndex lastDenseIndex = m_Dense.size() - 1;
 
-            if (sparseIndex == INVALID_SPARSE_INDEX ||
-                sparseIndex >= m_DenseToSparse.size() ||
-                m_DenseToSparse[sparseIndex] != index)
+            if (sparseIndex != lastDenseIndex)
             {
-                return;
+                const SparseIndex lastKey = m_DenseToSparse[lastDenseIndex];
+                if constexpr (std::is_trivially_copyable_v<T>)
+                    m_Dense[sparseIndex] = m_Dense[lastDenseIndex];
+                else
+                    m_Dense[sparseIndex] = std::move(m_Dense[lastDenseIndex]);
+
+                m_DenseToSparse[sparseIndex] = lastKey;
+                m_Sparse[lastKey] = sparseIndex;
             }
-
-            const std::size_t lastDenseIndex = m_Dense.size() - 1;
-
-            if (sparseIndex == lastDenseIndex)
-            {
-                m_Sparse[index] = INVALID_SPARSE_INDEX;
-                m_Dense.pop_back();
-                m_DenseToSparse.pop_back();
-                return;
-            }
-
-            const std::size_t lastKey = m_DenseToSparse[lastDenseIndex];
-
-            m_Dense[sparseIndex] = std::move(m_Dense[lastDenseIndex]);
-            m_DenseToSparse[sparseIndex] = lastKey;
-            m_Sparse[lastKey] = sparseIndex;
 
             m_Sparse[index] = INVALID_SPARSE_INDEX;
-
             m_Dense.pop_back();
             m_DenseToSparse.pop_back();
         }
 
-        virtual bool Contains(const SparseIndex& index) const override
+        inline bool Has(SparseIndex index) const
         {
-            if (index >= m_Sparse.size() || index == INVALID_SPARSE_INDEX)
-                return false;
+            if (!IsValidIndex(index))
+            {
+                throw std::runtime_error("SparseSet->Has: Invalid Index");
+            }
 
-            const std::uint32_t sparseIndex = m_Sparse[index];
-
-            if (sparseIndex == INVALID_SPARSE_INDEX)
-                return false;
-
+            const SparseIndex sparseIndex = m_Sparse[index];
             return sparseIndex < m_DenseToSparse.size() && m_DenseToSparse[sparseIndex] == index;
         }
 
-        virtual void Resize(std::size_t size) override
+        void Resize(std::size_t size)
         {
             // resize
             if (size > m_Sparse.size())
@@ -132,7 +133,7 @@ namespace FECS::Container
             }
         }
 
-        virtual void Clear() noexcept override
+        void Clear() noexcept
         {
             // clear the sparse ande dense vectors to clear memory
             m_Dense.clear();
@@ -140,89 +141,54 @@ namespace FECS::Container
             std::fill(m_Sparse.begin(), m_Sparse.end(), INVALID_SPARSE_INDEX);
         }
 
-        virtual std::size_t Size() override
+        const std::size_t Size() const
         {
             return m_Dense.size();
         }
 
-        T* Get(const SparseIndex& index)
+        T* Get(SparseIndex index)
         {
-            if (!IsValidIndex(index))
-            {
-                throw std::runtime_error("SparseSet->Get: Index out of Bounds");
-            }
-
             // Get the sparse index
-            const std::size_t sparseIndex = m_Sparse[index];
-
-            // Check if the element exists
-            if (sparseIndex == INVALID_SPARSE_INDEX ||
-                sparseIndex >= m_DenseToSparse.size() ||
-                m_DenseToSparse[sparseIndex] != index)
-            {
-                throw std::runtime_error("SparseSet->get: Element not found");
-            }
-
-            // Prefetch adjacent elements for locality
-            if constexpr (sizeof(T) <= 64)
-            {
-                // Only prefetch for reasonably sized types
-                if (sparseIndex + 4 < m_Dense.size())
-                {
-                    __builtin_prefetch(&m_Dense[sparseIndex + 1], 0, 3); // Prefetch next element
-                    __builtin_prefetch(&m_Dense[sparseIndex + 2], 0, 3);
-                    __builtin_prefetch(&m_Dense[sparseIndex + 3], 0, 3);
-                }
-            }
-
-            return &m_Dense[sparseIndex];
+            return &m_Dense[m_Sparse[index]];
         }
 
-        const T* Get(const SparseIndex& index) const
+        const T* Get(SparseIndex index) const
         {
-            if (!IsValidIndex(index))
-            {
-                throw std::runtime_error("SparseSet->Get: Index out of Bounds");
-            }
-
             // Get the sparse index
-            const std::size_t sparseIndex = m_Sparse[index];
-
-            // Check if the element exists
-            if (sparseIndex == INVALID_SPARSE_INDEX ||
-                sparseIndex >= m_DenseToSparse.size() ||
-                m_DenseToSparse[sparseIndex] != index)
-            {
-                throw std::runtime_error("SparseSet->get: Element not found");
-            }
-
-            // Prefetch adjacent elements for locality
-            if constexpr (sizeof(T) <= 64)
-            { // Only prefetch for reasonably sized types
-                if (sparseIndex + 1 < m_Dense.size())
-                {
-                    __builtin_prefetch(&m_Dense[sparseIndex + 1], 0, 3);
-                }
-            }
-
-            return &m_Dense[sparseIndex];
+            return &m_Dense[m_Sparse[index]];
         }
 
-        const std::vector<T>& GetAll() const noexcept
+        const std::vector<T>& GetAll() const
         {
             return m_Dense;
         }
 
+        // iteration
+        auto begin() const
+        {
+            return m_Dense.begin();
+        }
+        auto end() const
+        {
+            return m_Dense.end();
+        }
+
     private:
-        virtual bool IsValidIndex(const SparseIndex& index) const override
+        inline void EnsureCapacity(SparseIndex index)
+        {
+            if (index >= m_Sparse.size())
+                m_Sparse.resize(index + 1, INVALID_SPARSE_INDEX);
+        }
+
+        inline bool IsValidIndex(SparseIndex index) const
         {
             return index < m_Sparse.size() && index != INVALID_SPARSE_INDEX;
         }
 
         // members
-        std::vector<T> m_Dense;
-        std::vector<SparseIndex> m_Sparse;
-        std::vector<SparseIndex> m_DenseToSparse;
+        std::pmr::vector<T> m_Dense;
+        std::pmr::vector<SparseIndex> m_Sparse;
+        std::pmr::vector<SparseIndex> m_DenseToSparse;
     };
 
 }

@@ -29,7 +29,7 @@ namespace FECS
         template <typename Component>
         void RegisterComponent()
         {
-            m_ComponentManager.RegisterComponent<Component>();
+            m_ComponentManager.GetOrRegisterComponent<Component>();
         }
 
         template <typename Component>
