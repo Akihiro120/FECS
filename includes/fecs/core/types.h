@@ -1,34 +1,44 @@
 #pragma once
-#include <bitset>
+#include <cstdint>
+#include <limits>
 
 #ifndef FECS_COMPONENT_LIMIT
-#define FECS_COMPONENT_LIMIT 256
+#define FECS_COMPONENT_LIMIT 512
 #endif
 
-#ifndef FECS_SPARSE_MINIMUM
-#define FECS_SPARSE_MINIMUM 2048
-#endif
-
-#ifndef FECS_ENTITY_MINIMUM
-#define FECS_ENTITY_MINIMUM 10000
+#ifndef FECS_SPARSE_PAGE_SIZE
+#define FECS_SPARSE_PAGE_SIZE 2048
 #endif
 
 namespace FECS
 {
-    using SparseIndex = std::uint32_t;
-    using Entity = std::size_t;
-    using ComponentBit = std::size_t;
 
-    // invalids
-    constexpr std::size_t INVALID_SPARSE_INDEX = std::numeric_limits<SparseIndex>::max();
-    constexpr std::size_t INVALID_ENTITY = std::numeric_limits<Entity>::max();
+    using Entity = std::uint32_t;
+    using ComponentIndex = std::uint32_t;
 
-    // limits
-    constexpr std::size_t COMPONENT_LIMIT = FECS_COMPONENT_LIMIT;
-    constexpr std::size_t SPARSE_MINIMUM_SIZE = FECS_SPARSE_MINIMUM;
-    constexpr std::size_t ENTITY_MINIMUM = FECS_ENTITY_MINIMUM;
+    static constexpr Entity INVALID_ENTITY = std::numeric_limits<Entity>::max();
 
-    // signature
-    using Signature = std::bitset<COMPONENT_LIMIT>;
-    constexpr Signature EMPTY_SIGNATURE = Signature{};
+    static constexpr std::size_t COMPONENT_LIMIT = FECS_COMPONENT_LIMIT;
+    static constexpr std::size_t SPARSE_PAGE_SIZE = FECS_SPARSE_PAGE_SIZE;
+
+    static constexpr std::uint32_t INDEX_BITS = 20;
+    static constexpr std::uint32_t VERSION_BITS = 12;
+    static constexpr std::uint32_t INDEX_MASK = (1u << INDEX_BITS) - 1;
+    static constexpr std::uint32_t VERSION_MASK = ~INDEX_MASK;
+    static constexpr std::uint32_t NPOS = std::numeric_limits<std::uint32_t>::max();
+
+    inline Entity BuildEntityIndex(std::uint32_t index, std::uint32_t version)
+    {
+        return (version << INDEX_BITS) | (index & INDEX_MASK);
+    }
+
+    inline std::uint32_t GetEntityIndex(Entity e)
+    {
+        return e & INDEX_MASK;
+    }
+
+    inline std::uint32_t GetEntityVersion(Entity e)
+    {
+        return (e & VERSION_MASK) >> INDEX_BITS;
+    }
 }

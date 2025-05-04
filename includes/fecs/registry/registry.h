@@ -1,10 +1,12 @@
 #pragma once
-#include <fecs/manager/entity/entity_manager.h>
-#include <fecs/manager/component/component_manager.h>
+#include "fecs/containers/sparse_set.h"
+#include "fecs/manager/component_manager.h"
+#include "fecs/manager/entity_manager.h"
+#include "fecs/manager/group_manager.h"
 
 namespace FECS
 {
-
+    using namespace FECS::Manager;
     class Registry
     {
     public:
@@ -12,52 +14,67 @@ namespace FECS
         {
         }
 
-        ~Registry()
-        {
-        }
-
         Entity CreateEntity()
         {
-            return m_EntityManager.CreateEntity();
+            return m_EntityManager.Create();
         }
 
-        void DestroyEntity(Entity& entity)
+        void DestroyEntity(Entity id)
         {
-            m_EntityManager.DestroyEntity(entity);
+            m_EntityManager.Destroy(id);
         }
 
-        template <typename Component>
-        void RegisterComponent()
+        bool IsEntityAlive(Entity id) const
         {
-            m_ComponentManager.GetOrRegisterComponent<Component>();
+            return m_EntityManager.IsAlive(id);
         }
 
-        template <typename Component>
-        void AttachComponent(Entity entity, Component&& component)
+        EntityManager& GetEntityManager()
         {
-            m_ComponentManager.AttachComponent<Component>(entity, std::move(component));
+            return m_EntityManager;
         }
 
-        template <typename Component>
-        void DetachComponent(Entity entity)
+        template <typename T>
+        Container::SparseSet<T>& RegisterComponent()
         {
-            m_ComponentManager.DetachComponent<Component>(entity);
+            return ComponentManager::GetPool<T>(&m_EntityManager);
         }
 
-        template <typename Component>
-        Component* GetComponent(Entity entity)
+        template <typename T>
+        void Attach(Entity e, const T& component)
         {
-            return m_ComponentManager.Get<Component>(entity);
+            Container::SparseSet<T>& set = ComponentManager::GetPool<T>(&m_EntityManager);
+            set.Insert(e, component);
         }
 
-        template <typename... Components, typename Function>
-        void Each(Function&& queryFunction)
+        template <typename T>
+        T& Get(Entity e)
         {
-            m_ComponentManager.Each<Components...>(std::move(queryFunction));
+            Container::SparseSet<T>& set = ComponentManager::GetPool<T>(&m_EntityManager);
+            return set.Get(e);
+        }
+
+        template <typename T>
+        void Remove(Entity e)
+        {
+            Container::SparseSet<T>& set = ComponentManager::GetPool<T>(&m_EntityManager);
+            set.Remove(e);
+        }
+
+        template <typename T>
+        void Has(Entity e)
+        {
+            Container::SparseSet<T>& set = ComponentManager::GetPool<T>(&m_EntityManager);
+            set.Has(e);
+        }
+
+        template <typename... C>
+        FECS::Manager::Group<C...> Group()
+        {
+            return FECS::Manager::Group<C...>(&m_EntityManager);
         }
 
     private:
         Manager::EntityManager m_EntityManager;
-        Manager::ComponentManager m_ComponentManager;
     };
 }
