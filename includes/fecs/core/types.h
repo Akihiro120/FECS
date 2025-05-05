@@ -12,6 +12,9 @@
 
 namespace FECS
 {
+    struct GlobalComponent
+    {
+    };
 
     using Entity = std::uint32_t;
     using ComponentIndex = std::uint32_t;

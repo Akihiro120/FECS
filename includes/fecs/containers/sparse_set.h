@@ -9,8 +9,15 @@ namespace FECS
 {
     namespace Container
     {
+        class ISparseSet
+        {
+        public:
+            virtual ~ISparseSet() = default;
+            virtual void Remove(Entity e) = 0;
+        };
+
         template <typename T>
-        class SparseSet
+        class SparseSet : public ISparseSet
         {
         public:
             SparseSet()
@@ -36,9 +43,9 @@ namespace FECS
                 }
             }
 
-            inline void Remove(Entity e)
+            inline virtual void Remove(Entity e) override
             {
-                assert(m_EntityManager->IsAlive(e) && "Cannot Assign to Dead Entity");
+                assert(m_EntityManager->IsAlive(e) && "Cannot Remove from Dead Entity");
                 std::uint32_t idx = FECS::GetEntityIndex(e);
 
                 auto& slot = SparseSlot(idx);
@@ -66,12 +73,15 @@ namespace FECS
                 {
                     return (*page)[GetPageOffset(idx)] != NPOS;
                 }
+
+                return false;
             }
 
             inline T& Get(Entity e)
             {
                 assert(Has(e) && "Component not Present");
                 std::uint32_t idx = GetEntityIndex(e);
+                assert(m_EntityManager->IsAlive(e) && "Cannot Get from Dead Entity");
                 auto* page = PageFor(idx);
                 assert(page && (*page)[GetPageOffset(idx)] != NPOS);
                 return m_Dense[(*page)[GetPageOffset(idx)]];
@@ -81,6 +91,7 @@ namespace FECS
             {
                 assert(Has(e) && "Component not Present");
                 std::uint32_t idx = GetEntityIndex(e);
+                assert(m_EntityManager->IsAlive(e) && "Cannot Get from Dead Entity");
                 auto* page = PageFor(idx);
                 assert(page && (*page)[GetPageOffset(idx)] != NPOS);
                 return m_Dense[(*page)[GetPageOffset(idx)]];
@@ -147,17 +158,25 @@ namespace FECS
                 return (*m_Sparse[p])[GetPageOffset(idx)];
             }
 
-            inline std::uint32_t GetPageIndex(std::uint32_t idx)
+            inline const std::uint32_t GetPageIndex(std::uint32_t idx) const
             {
                 return idx / SPARSE_PAGE_SIZE;
             }
 
-            inline std::uint32_t GetPageOffset(std::uint32_t idx)
+            inline const std::uint32_t GetPageOffset(std::uint32_t idx) const
             {
                 return idx % SPARSE_PAGE_SIZE;
             }
 
             std::array<std::uint32_t, SPARSE_PAGE_SIZE>* PageFor(std::uint32_t idx)
+            {
+                std::uint32_t p = GetPageIndex(idx);
+                if (p >= m_Sparse.size())
+                    return nullptr;
+                return m_Sparse[p];
+            }
+
+            const std::array<std::uint32_t, SPARSE_PAGE_SIZE>* PageFor(std::uint32_t idx) const
             {
                 std::uint32_t p = GetPageIndex(idx);
                 if (p >= m_Sparse.size())

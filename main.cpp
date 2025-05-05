@@ -19,6 +19,7 @@ int main()
     FECS::Registry registry;
     registry.GetEntityManager().Reserve(amount);
     registry.RegisterComponent<std::uint32_t>().Reserve(amount);
+    registry.RegisterComponent<std::size_t>().Reserve(amount);
 
     // create a list of entities
     std::vector<FECS::Entity> entities;
@@ -29,11 +30,16 @@ int main()
     }
 
     {
-        Benchmark timer("FECS Attach");
+        Benchmark timer("FECS Attach(2 Components)");
 
         for (std::uint32_t i = 0; i < amount; i++)
         {
             registry.Attach<std::uint32_t>(entities[i], i * 32);
+        }
+
+        for (std::uint32_t i = 0; i < amount; i++)
+        {
+            registry.Attach<std::size_t>(entities[i], i);
         }
     }
 
@@ -46,26 +52,15 @@ int main()
         }
     }
 
-    auto group = registry.Group<std::uint32_t>();
-    group.Rebuild();
-    group.Each([&](FECS::Entity e, std::uint32_t& i)
     {
-        std::cout << i << std::endl;
-    });
+        auto view = registry.View<std::uint32_t, std::size_t>().Reserve(amount);
+        Benchmark timer("FECS Group(2 Components)");
+
+        view.Each([&](FECS::Entity e, std::uint32_t& x, std::size_t& y)
+        {
+            x += y;
+        });
+    }
 
     return 0;
 }
-
-/*
-SoA + sparse-set pools for single-component speed,
-
-Archetype tables + chunking for multi-component queries,
-
-Compile-time templating + inline routines to eliminate runtime overhead,
-
-Direct integer handles + version checks for safety without indirection,
-
-Pre-allocation + optional custom allocators for smooth memory behavior,
-
-And staging/parallel splits if you need multithreading—
-*/

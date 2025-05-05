@@ -2,10 +2,12 @@
 #include "fecs/containers/sparse_set.h"
 #include "fecs/manager/component_manager.h"
 #include "fecs/manager/entity_manager.h"
-#include "fecs/manager/group_manager.h"
+#include "fecs/manager/view_manager.h"
 
 namespace FECS
 {
+    // special
+
     using namespace FECS::Manager;
     class Registry
     {
@@ -21,6 +23,10 @@ namespace FECS
 
         void DestroyEntity(Entity id)
         {
+
+            ComponentManager::DeleteEntity(id);
+            ComponentManager::GetVersion<GlobalComponent>()++;
+
             m_EntityManager.Destroy(id);
         }
 
@@ -45,6 +51,9 @@ namespace FECS
         {
             Container::SparseSet<T>& set = ComponentManager::GetPool<T>(&m_EntityManager);
             set.Insert(e, component);
+
+            // rebuild flag
+            ComponentManager::GetVersion<T>()++;
         }
 
         template <typename T>
@@ -55,10 +64,13 @@ namespace FECS
         }
 
         template <typename T>
-        void Remove(Entity e)
+        void Detach(Entity e)
         {
             Container::SparseSet<T>& set = ComponentManager::GetPool<T>(&m_EntityManager);
             set.Remove(e);
+
+            // rebuild flag
+            ComponentManager::GetVersion<T>()++;
         }
 
         template <typename T>
@@ -69,9 +81,9 @@ namespace FECS
         }
 
         template <typename... C>
-        FECS::Manager::Group<C...> Group()
+        FECS::Manager::View<C...> View()
         {
-            return FECS::Manager::Group<C...>(&m_EntityManager);
+            return FECS::Manager::View<C...>(&m_EntityManager);
         }
 
     private:
