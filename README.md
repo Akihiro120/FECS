@@ -1,5 +1,8 @@
 # FECS - A Functional Entity Component System
 
+[![Test](https://github.com/Akihiro120/FECS/actions/workflows/test.yml/badge.svg)](https://github.com/Akihiro120/FECS/actions/workflows/test.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
 > A functional and lightweight C++ ECS framework.
 > Optimized to *"consume 100% of your memory"* and usage in real-time games.
 
