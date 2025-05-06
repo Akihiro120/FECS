@@ -57,6 +57,8 @@ namespace FECS
                     comps->SetEntityManager(nullptr);
                     comps->Clear();
                 }
+
+                m_RegisteredComponents.clear();
             }
         };
     }
