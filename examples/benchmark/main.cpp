@@ -1,3 +1,4 @@
+
 #include "benchmark.h"
 #include "fecs/core/types.h"
 #include "fecs/manager/entity_manager.h"

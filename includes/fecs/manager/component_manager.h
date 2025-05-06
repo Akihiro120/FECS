@@ -12,6 +12,8 @@ namespace FECS
         private:
             inline static std::vector<Container::ISparseSet*> m_RegisteredComponents;
 
+            ComponentManager() = default;
+
         public:
             template <typename T>
             static Container::SparseSet<T>&
@@ -45,6 +47,15 @@ namespace FECS
                 for (auto& comps : m_RegisteredComponents)
                 {
                     comps->Remove(e);
+                }
+            }
+
+            static void ClearRegistry()
+            {
+                for (auto& comps : m_RegisteredComponents)
+                {
+                    comps->Clear();
+                    GetVersion<GlobalComponent>()++;
                 }
             }
         };

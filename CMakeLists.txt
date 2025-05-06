@@ -8,7 +8,9 @@ include_directories(${FECS_INCLUDE_DIRS})
 include_directories(${CMAKE_SOURCE_DIR}/vendor/)
 
 set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG -march=native -flto")
-set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g -DNDEBUG")
-set(CMAKE_CXX_FLAGS_MINSIZEREL "-Os -DNDEBUG")
 
-add_executable(${PROJECT_NAME} main.cpp)
+add_library(${PROJECT_NAME} INTERFACE)
+target_include_directories(${PROJECT_NAME} INTERFACE ${FECS_INCLUDE_DIRS})
+
+add_subdirectory(examples/benchmark)
+add_subdirectory(examples/tests)

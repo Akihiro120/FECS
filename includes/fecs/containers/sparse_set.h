@@ -14,6 +14,7 @@ namespace FECS
         public:
             virtual ~ISparseSet() = default;
             virtual void Remove(Entity e) = 0;
+            virtual void Clear() = 0;
         };
 
         template <typename T>
@@ -39,6 +40,7 @@ namespace FECS
                 }
                 else
                 {
+                    // override
                     m_Dense[slot] = component;
                 }
             }
@@ -68,6 +70,7 @@ namespace FECS
 
             inline bool Has(Entity e) const
             {
+                assert(m_EntityManager->IsAlive(e) && "Cannot Check Has on Dead Entity");
                 uint32_t idx = FECS::GetEntityIndex(e);
                 if (auto* page = PageFor(idx))
                 {
@@ -81,7 +84,6 @@ namespace FECS
             {
                 assert(Has(e) && "Component not Present");
                 std::uint32_t idx = GetEntityIndex(e);
-                assert(m_EntityManager->IsAlive(e) && "Cannot Get from Dead Entity");
                 auto* page = PageFor(idx);
                 assert(page && (*page)[GetPageOffset(idx)] != NPOS);
                 return m_Dense[(*page)[GetPageOffset(idx)]];
@@ -91,7 +93,6 @@ namespace FECS
             {
                 assert(Has(e) && "Component not Present");
                 std::uint32_t idx = GetEntityIndex(e);
-                assert(m_EntityManager->IsAlive(e) && "Cannot Get from Dead Entity");
                 auto* page = PageFor(idx);
                 assert(page && (*page)[GetPageOffset(idx)] != NPOS);
                 return m_Dense[(*page)[GetPageOffset(idx)]];
@@ -139,6 +140,17 @@ namespace FECS
                 return m_EntityManager;
             }
 
+            inline virtual void Clear() override
+            {
+                for (auto page : m_Sparse)
+                {
+                    if (page)
+                        page->fill(NPOS);
+                }
+                m_Dense.clear();
+                m_DenseEntities.clear();
+            }
+
         private:
             std::uint32_t& SparseSlot(std::uint32_t idx)
             {
@@ -150,7 +162,6 @@ namespace FECS
 
                 if (!m_Sparse[p])
                 {
-                    std::cout << "Resize" << std::endl;
                     m_Sparse[p] = new std::array<std::uint32_t, SPARSE_PAGE_SIZE>();
                     m_Sparse[p]->fill(NPOS);
                 }

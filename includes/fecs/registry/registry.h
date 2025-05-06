@@ -40,6 +40,11 @@ namespace FECS
             return m_EntityManager;
         }
 
+        void Reserve(std::size_t size)
+        {
+            ComponentManager::Reserve(size);
+        }
+
         template <typename T>
         Container::SparseSet<T>& RegisterComponent()
         {

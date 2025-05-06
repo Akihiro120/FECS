@@ -24,6 +24,8 @@ namespace FECS
                   m_GlobalVersion(false),
                   m_CacheBuilt(false)
             {
+                m_Cache = {};
+                m_Cache.clear();
             }
 
             ~View()
@@ -66,7 +68,7 @@ namespace FECS
                     // declare clean
                     idx = 0;
                     ((m_LastVersions[idx++] = ComponentManager::GetVersion<Components>()), ...);
-                    // m_GlobalVersion = ComponentManager::GetVersion<GlobalComponent>();
+                    m_GlobalVersion = ComponentManager::GetVersion<GlobalComponent>();
                     m_CacheBuilt = true;
                 }
 
