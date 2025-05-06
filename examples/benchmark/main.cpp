@@ -15,7 +15,7 @@ int main()
 {
     std::cout << "FECS Benchmark -----------------------------" << "\033[0m" << std::endl;
 
-    std::uint32_t amount = 10000;
+    std::uint32_t amount = 1000000;
 
     FECS::Registry registry;
     registry.GetEntityManager().Reserve(amount);
@@ -55,6 +55,11 @@ int main()
 
     {
         auto view = registry.View<std::uint32_t, std::size_t>().Reserve(amount);
+        // cache it :)
+        view.Each([&](FECS::Entity e, std::uint32_t& x, std::size_t& y)
+        {
+            x += y;
+        });
         Benchmark timer("FECS Group(2 Components)");
 
         view.Each([&](FECS::Entity e, std::uint32_t& x, std::size_t& y)

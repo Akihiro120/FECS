@@ -1,0 +1,39 @@
+name: Test
+
+on:
+  push:
+    paths:
+      - 'examples/tests/**'
+
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        build_type: [Debug]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup CMAKE
+        uses: lukka/get-cmake@v3
+        with:
+          cmake-version: '3.25'
+
+      - name: Install build tools
+        run: sudo apt-get update && sudo apt-get install -y ninja-build
+
+      - name: Configure and Build Project
+        run: |
+            mkdir build 
+            cd build 
+            cmake -G Ninja .. 
+            ninja 
+            cd .. 
+
+      - name: Run Tests
+        run: |
+            cd build/examples/tests/ 
+            ./Tests

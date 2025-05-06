@@ -70,7 +70,6 @@ namespace FECS
 
             inline bool Has(Entity e) const
             {
-                assert(m_EntityManager->IsAlive(e) && "Cannot Check Has on Dead Entity");
                 uint32_t idx = FECS::GetEntityIndex(e);
                 if (auto* page = PageFor(idx))
                 {
@@ -82,6 +81,7 @@ namespace FECS
 
             inline T& Get(Entity e)
             {
+                assert(m_EntityManager->IsAlive(e) && "Cannot Get on Dead Entity");
                 assert(Has(e) && "Component not Present");
                 std::uint32_t idx = GetEntityIndex(e);
                 auto* page = PageFor(idx);
@@ -91,6 +91,7 @@ namespace FECS
 
             inline const T& Get(Entity e) const
             {
+                assert(m_EntityManager->IsAlive(e) && "Cannot Get on Dead Entity");
                 assert(Has(e) && "Component not Present");
                 std::uint32_t idx = GetEntityIndex(e);
                 auto* page = PageFor(idx);

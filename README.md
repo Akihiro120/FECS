@@ -1,84 +1,101 @@
-# FECS - A Lightweight Entity Component System
+# FECS - A Functional Entity Component System
 
-FECS is a lightweight, header-only Entity Component System (ECS) written in modern c++. It leverages a custom sparse set data structure to acheieve near constant-time insertion, removal and retrieval of components. FECS has been designed with clarity and efficiency in mind, suitable for small-to-medium projects and for educational purposes.
-
----
-
-### Features
-- **Entity Management**
-    Simple Interface for creating and removing entities with unique IDs.
-- **Component Storage via Sparse Set**
-    Utilises a fixed-sized sparse set for O(1) access and update, minimising memory overhead.
-- **Flexible Component Attachment**
-    Attach and Detach components to/from entities via a templated API, using `std::bitset` to track component signatures
-- **Query System**
-    Query entities that match a given set of components types with an elegant template-based parameter pack.
-- **Modern C++ Techniques**
-    Uses templates, assertions, and RAII for robust maintainable code.
+> A functional and lightweight C++ ECS framework.
+> Optimized to *"consume 100% of your memory"* and usage in real-time games.
 
 ---
+## Table of Contents
+- [Why FECS?](#why-fecs)
+- [Features](#features)
+- [Installation](#installation)
+- [Prerequisites](#prerequisites)
+- [Quick Start](#quick-start)
+- [API Reference](#api-reference)
+- [License](#license)
 
-### Getting Started
-#### Prerequisites
-- A C++ 17 compliant compiler.
-- Basic understanding of C++ templates and the ECS design pattern.
+---
+## Why FECS
+Most ECS libraries trade off binary size for convenience.  
+**FECS** flips that trade-off: by packing data densely and avoiding hidden allocations, it delivers **raw speed** at the cost of larger binaries—perfect when you need unlimited entities and components in a real-time engine.
 
-#### Installation
-FECS is header-only. Simply clone the repository and include the relevant headers in your project:
+---
+## Features
+- **Header-Only**: Drop all files into your include path.
+- **Zero Hidden Allocations**: Every component pool is pre-allocated and determined at compile time.
+- **Unlimited Entities and Components**: Indexed by 32-bit IDs + versioning.
+- **Control**: Full control over what gets allocated, and how much.
+- **Memory Efficiency**: Densely packed data + effective caching.
+
+---
+## Installation
+Download FECS via Clone
 ``` bash
 git clone https://github.com/Akihiro120/FECS.git
 ```
 
-Then, in your C++ source file:
+FECS is a `Single Header` library so you only have to add it to your `Vendor/Includes` directory.
+
+To build example projects, simply run 
+e.g. via `Ninja`
+
 ``` bash
-#include "fecs.h"
+mkdir build
+cd build
+
+cmake -G Ninja ..
+ninja
 ```
 
 ---
-### Usage
-#### Preprocessors
-You can define and change the MAX size for the Sparse, and the MAX number of components for FECS.
-``` c++
-#define MAX_SPARSE_SIZE 2000
-#define MAX_COMPONENTS 100
-```
-#### Creating an Entity
-``` c++
-FECS ecs;
-Entity entity = ecs.create_entity();
-```
-#### Attaching a Component
-Define a component type (e.g. a struct) and attach it to an entity:
-``` c++
-struct Position {
-    float x, y;
-};
+## Prerequisites
+- C++17 compatible compiler (GCC >= 7, Clang >= 6, MSVC >= 2017)
+- CMake >= 3.25 (optional, if you want to build `Example` projects)
 
-ecs.attach<Position>(entity, {10.0f, 20.0f});
-```
-#### Detaching a Component
-``` c++
-ecs.detach<Position>(entity);
-```
-#### Accessing a Component
-``` c++
-Position* pos = ecs.get<Position>(entity);
-if (pos) {
-    // use *pos
+---
+## Quick Start
+``` cpp
+#include <fecs/fecs.hpp>
+
+struct Position { float x, y; };
+struct Velocity { float dx, dy; };
+
+int main()
+{
+    FECS::Registry registry;
+
+    // Create 1000 entities with Position + Velocity
+    for (int i = 0; i < 1000; i++)
+    {
+        FECS::Entity e = registry.CreateEntity();
+        registry.Attach<Position>(e, Position{0.0f, 0.0f});
+        registry.Attach<Velocity>(e, Velocity{1.0f, 0.5f});
+    }
+
+    // Simple system
+    FECS::View<Position, Velocity> sys = registry.View<Position, Velocity>();
+    sys.Each([&](Entity e, Position& pos, Velocity& vel){
+        pos.x += vel.dx;
+        pos.y += vel.dy;
+    });
 }
 ```
-#### Querying Entities
-Iterate over entities with specific components using the query interface:
-``` c++
-ecs.query<Position, Velocity>([](Entity e, Position& pos, Velocity& vel) {
-    // process entity e and its Position and Velocity Component
-});
-```
+
+### Usage
+1. **Define** your Components structures.
+2. **Create** a `FECS::Registry` instance.
+3. **Spawn** entities with `.CreateEntity()`, then `.Attach<Component>(...)`.
+4. **Process** groups of components via `.View<...>().Each([&](...){})`.
+
+For *full details*, see the [API Reference](#api-reference).
 
 ---
-### Contributing
-Contributions to FECS are most welcome. If you have ideas for improvement or have identified any issues, please open an issue or submit a pull request. When contributing, please maintain the current academic tone and clarity of documentation.
+## API Reference
+All public classes and functions are documented in [docs/api.md](docs/api.md). Highlights include:
+- `FECS::Registry` - The Core Manager
+- `registry.CreateEntity()`, `registry.DestroyEntity(entity)`
+- `registry.Attach<T>(...)`, `registry.Detach<T>(entity)`
+- `registry.View<Ts...>()`, `.Each(...)`
 
 ---
-### License
-This project is licensed under the MIT Licence – see the LICENCE file for details.
+## License
+Distributed under the MIT License. See LICENSE for details.

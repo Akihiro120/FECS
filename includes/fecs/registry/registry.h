@@ -86,9 +86,9 @@ namespace FECS
         }
 
         template <typename... C>
-        FECS::Manager::View<C...> View()
+        FECS::View<C...> View()
         {
-            return FECS::Manager::View<C...>(&m_EntityManager);
+            return FECS::View<C...>(&m_EntityManager);
         }
 
     private:

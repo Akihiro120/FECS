@@ -2,3 +2,4 @@
 build/
 run
 .DS_Store
+CMakePresets.json
