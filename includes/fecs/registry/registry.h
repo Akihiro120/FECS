@@ -1,41 +1,97 @@
 #pragma once
-#include <fecs/manager/entity/entity_manager.h>
-#include <fecs/manager/component/component_manager.h>
-#include <fecs/manager/query/query_manager.h>
+#include "fecs/containers/sparse_set.h"
+#include "fecs/manager/component_manager.h"
+#include "fecs/manager/entity_manager.h"
+#include "fecs/manager/view_manager.h"
 
 namespace FECS
 {
+    // special
 
+    using namespace FECS::Manager;
     class Registry
     {
     public:
-        Registry();
-        ~Registry();
+        Registry()
+        {
+        }
 
-        // entity control
-        Entity CreateEntity();
-        void DestroyEntity(Entity& entity);
+        Entity CreateEntity()
+        {
+            return m_EntityManager.Create();
+        }
 
-        template <typename Component>
-        void AttachComponent(const Entity& entity, const Component& component);
+        void DestroyEntity(Entity id)
+        {
 
-        template <typename Component>
-        void DetachComponent(const Entity& entity);
+            ComponentManager::DeleteEntity(id);
+            ComponentManager::GetVersion<GlobalComponent>()++;
 
-        template <typename Component>
-        Component& Get(const Entity& entity);
+            m_EntityManager.Destroy(id);
+        }
 
-        template <typename Component>
-        bool Has(const Entity& entity);
+        bool IsEntityAlive(Entity id) const
+        {
+            return m_EntityManager.IsAlive(id);
+        }
 
-        template <typename... Components, typename Function>
-        void Each(Function&& queryFunction);
+        EntityManager& GetEntityManager()
+        {
+            return m_EntityManager;
+        }
+
+        void Reserve(std::size_t size)
+        {
+            ComponentManager::Reserve(size);
+        }
+
+        template <typename T>
+        Container::SparseSet<T>& RegisterComponent()
+        {
+            return ComponentManager::GetPool<T>(&m_EntityManager);
+        }
+
+        template <typename T>
+        void Attach(Entity e, const T& component)
+        {
+            Container::SparseSet<T>& set = ComponentManager::GetPool<T>(&m_EntityManager);
+            set.Insert(e, component);
+
+            // rebuild flag
+            ComponentManager::GetVersion<T>()++;
+        }
+
+        template <typename T>
+        T& Get(Entity e)
+        {
+            Container::SparseSet<T>& set = ComponentManager::GetPool<T>(&m_EntityManager);
+            return set.Get(e);
+        }
+
+        template <typename T>
+        void Detach(Entity e)
+        {
+            Container::SparseSet<T>& set = ComponentManager::GetPool<T>(&m_EntityManager);
+            set.Remove(e);
+
+            // rebuild flag
+            ComponentManager::GetVersion<T>()++;
+        }
+
+        template <typename T>
+        void Has(Entity e)
+        {
+            Container::SparseSet<T>& set = ComponentManager::GetPool<T>(&m_EntityManager);
+            set.Has(e);
+        }
+
+        template <typename... C>
+        FECS::View<C...> View()
+        {
+            return FECS::View<C...>(&m_EntityManager);
+        }
 
     private:
         Manager::EntityManager m_EntityManager;
-        Manager::ComponentManager m_ComponentManager;
-        Manager::QueryManager m_QueryManager;
     };
 }
-
-#include "registry.inl"
