@@ -88,8 +88,8 @@ void TestDeleteEntityStripsAll()
     registry.RegisterComponent<Velocity>();
 
     Entity e = registry.CreateEntity();
-    auto& posSet = registry.RegisterComponent<Position>();
-    auto& velSet = registry.RegisterComponent<Velocity>();
+    auto& posSet = registry.GetPool<Position>();
+    auto& velSet = registry.GetPool<Velocity>();
 
     registry.Attach<Position>(e, {1, 2});
     registry.Attach<Velocity>(e, {3, 4});

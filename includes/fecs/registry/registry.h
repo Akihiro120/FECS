@@ -52,6 +52,12 @@ namespace FECS
         }
 
         template <typename T>
+        Container::SparseSet<T>& GetPool()
+        {
+            return ComponentManager::GetPool<T>(&m_EntityManager);
+        }
+
+        template <typename T>
         void Attach(Entity e, const T& component)
         {
             Container::SparseSet<T>& set = ComponentManager::GetPool<T>(&m_EntityManager);

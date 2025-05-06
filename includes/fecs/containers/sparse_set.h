@@ -15,6 +15,8 @@ namespace FECS
             virtual ~ISparseSet() = default;
             virtual void Remove(Entity e) = 0;
             virtual void Clear() = 0;
+            virtual void SetEntityManager(Manager::EntityManager* m) = 0;
+            virtual Manager::EntityManager* GetEntityManager() = 0;
         };
 
         template <typename T>
@@ -131,12 +133,12 @@ namespace FECS
                 m_DenseEntities.reserve(amount);
             }
 
-            void SetEntityManager(Manager::EntityManager* m)
+            virtual void SetEntityManager(Manager::EntityManager* m) override
             {
                 m_EntityManager = m;
             }
 
-            Manager::EntityManager* GetEntityManager()
+            virtual Manager::EntityManager* GetEntityManager() override
             {
                 return m_EntityManager;
             }

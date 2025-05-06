@@ -54,8 +54,8 @@ namespace FECS
             {
                 for (auto& comps : m_RegisteredComponents)
                 {
+                    comps->SetEntityManager(nullptr);
                     comps->Clear();
-                    GetVersion<GlobalComponent>()++;
                 }
             }
         };
