@@ -473,7 +473,7 @@ int main()
     TestIDReuseNoLeak();
     TestPageBoundaryAttach();
     TestDynamicViewUpdate();
-    std::cout << "✅ All edge-case ECS tests passed!\n";
+    std::cout << "✅ All edge case ECS tests passed!\n";
 
     TestHasOnMissing();
     TestTripleComponentView();
