@@ -93,7 +93,7 @@ For *full details*, see the [API Reference](#api-reference).
 
 ---
 ## API Reference
-All public classes and functions are documented in [docs/api.md](docs/api.md). Highlights include:
+All public classes and functions are documented in [docs/api.md](https://akihiro120.github.io/FECS/html/index.html). Highlights include:
 - `FECS::Registry` - The Core Manager
 - `registry.CreateEntity()`, `registry.DestroyEntity(entity)`
 - `registry.Attach<T>(...)`, `registry.Detach<T>(entity)`
