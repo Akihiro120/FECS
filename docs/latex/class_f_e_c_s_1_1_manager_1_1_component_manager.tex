@@ -1,0 +1,132 @@
+\doxysection{FECS\+::Manager\+::Component\+Manager Class Reference}
+\hypertarget{class_f_e_c_s_1_1_manager_1_1_component_manager}{}\label{class_f_e_c_s_1_1_manager_1_1_component_manager}\index{FECS::Manager::ComponentManager@{FECS::Manager::ComponentManager}}
+
+
+Provides static access to component pools and handles entity cleanup.  
+
+
+
+
+{\ttfamily \#include $<$component\+\_\+manager.\+h$>$}
+
+\doxysubsubsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+{\footnotesize template$<$typename T$>$ }\\static \mbox{\hyperlink{class_f_e_c_s_1_1_container_1_1_sparse_set}{Container\+::\+Sparse\+Set}}$<$ T $>$ \& \mbox{\hyperlink{class_f_e_c_s_1_1_manager_1_1_component_manager_a112909cdecc309c2a32e633521ba83f9}{Get\+Pool}} (\mbox{\hyperlink{class_f_e_c_s_1_1_manager_1_1_entity_manager}{Entity\+Manager}} \texorpdfstring{$\ast$}{*}manager)
+\begin{DoxyCompactList}\small\item\em Get the component pool for a specific component type. \end{DoxyCompactList}\item 
+{\footnotesize template$<$typename T$>$ }\\static std\+::uint32\+\_\+t \& \mbox{\hyperlink{class_f_e_c_s_1_1_manager_1_1_component_manager_afe58a0838fd44137a3062811adb89622}{Get\+Version}} ()
+\begin{DoxyCompactList}\small\item\em Returns a per-\/type version reference for tracking changes. \end{DoxyCompactList}\item 
+static void \mbox{\hyperlink{class_f_e_c_s_1_1_manager_1_1_component_manager_a127794c4a13c25c1e66f8ae15f394178}{Reserve}} (std\+::size\+\_\+t size)
+\begin{DoxyCompactList}\small\item\em Reserves storage space for predicted number of component types. \end{DoxyCompactList}\item 
+static void \mbox{\hyperlink{class_f_e_c_s_1_1_manager_1_1_component_manager_ab039a15908a1cfee983a1e8273320ff1}{Delete\+Entity}} (\mbox{\hyperlink{types_8h_abf3962244e98187a2945549333981904}{Entity}} e)
+\begin{DoxyCompactList}\small\item\em Removes an entity from all registered component pools. \end{DoxyCompactList}\item 
+static void \mbox{\hyperlink{class_f_e_c_s_1_1_manager_1_1_component_manager_a51efa60b636d5c2011d99855b85bd6e2}{Clear\+Registry}} ()
+\begin{DoxyCompactList}\small\item\em Clears all component pools and resets internal state. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Provides static access to component pools and handles entity cleanup. 
+
+The \doxylink{class_f_e_c_s_1_1_manager_1_1_component_manager}{Component\+Manager} is a singleton-\/like utility with static methods and per-\/type static storage (via Templates) to manage components, and versions efficiently. 
+
+\doxysubsection{Member Function Documentation}
+\Hypertarget{class_f_e_c_s_1_1_manager_1_1_component_manager_a51efa60b636d5c2011d99855b85bd6e2}\index{FECS::Manager::ComponentManager@{FECS::Manager::ComponentManager}!ClearRegistry@{ClearRegistry}}
+\index{ClearRegistry@{ClearRegistry}!FECS::Manager::ComponentManager@{FECS::Manager::ComponentManager}}
+\doxysubsubsection{\texorpdfstring{ClearRegistry()}{ClearRegistry()}}
+{\footnotesize\ttfamily \label{class_f_e_c_s_1_1_manager_1_1_component_manager_a51efa60b636d5c2011d99855b85bd6e2} 
+static void FECS\+::\+Manager\+::\+Component\+Manager\+::\+Clear\+Registry (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [static]}}
+
+
+
+Clears all component pools and resets internal state. 
+
+Typically used in testing or to reset the ECS state. \Hypertarget{class_f_e_c_s_1_1_manager_1_1_component_manager_ab039a15908a1cfee983a1e8273320ff1}\index{FECS::Manager::ComponentManager@{FECS::Manager::ComponentManager}!DeleteEntity@{DeleteEntity}}
+\index{DeleteEntity@{DeleteEntity}!FECS::Manager::ComponentManager@{FECS::Manager::ComponentManager}}
+\doxysubsubsection{\texorpdfstring{DeleteEntity()}{DeleteEntity()}}
+{\footnotesize\ttfamily \label{class_f_e_c_s_1_1_manager_1_1_component_manager_ab039a15908a1cfee983a1e8273320ff1} 
+static void FECS\+::\+Manager\+::\+Component\+Manager\+::\+Delete\+Entity (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{types_8h_abf3962244e98187a2945549333981904}{Entity}}}]{e}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [static]}}
+
+
+
+Removes an entity from all registered component pools. 
+
+Used during entity destruction to clean up attached components.
+
+
+\begin{DoxyParams}{Parameters}
+{\em e} & The entity to remove. \\
+\hline
+\end{DoxyParams}
+\Hypertarget{class_f_e_c_s_1_1_manager_1_1_component_manager_a112909cdecc309c2a32e633521ba83f9}\index{FECS::Manager::ComponentManager@{FECS::Manager::ComponentManager}!GetPool@{GetPool}}
+\index{GetPool@{GetPool}!FECS::Manager::ComponentManager@{FECS::Manager::ComponentManager}}
+\doxysubsubsection{\texorpdfstring{GetPool()}{GetPool()}}
+{\footnotesize\ttfamily \label{class_f_e_c_s_1_1_manager_1_1_component_manager_a112909cdecc309c2a32e633521ba83f9} 
+template$<$typename T$>$ \\
+static \mbox{\hyperlink{class_f_e_c_s_1_1_container_1_1_sparse_set}{Container\+::\+Sparse\+Set}}$<$ T $>$ \& FECS\+::\+Manager\+::\+Component\+Manager\+::\+Get\+Pool (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{class_f_e_c_s_1_1_manager_1_1_entity_manager}{Entity\+Manager}} \texorpdfstring{$\ast$}{*}}]{manager}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [static]}}
+
+
+
+Get the component pool for a specific component type. 
+
+If the pool doesnt exist yet, it\textquotesingle{}s created and registered.
+
+
+\begin{DoxyTemplParams}{Template Parameters}
+{\em T} & The component type. \\
+\hline
+\end{DoxyTemplParams}
+
+\begin{DoxyParams}{Parameters}
+{\em manager} & Pointer to the \doxylink{class_f_e_c_s_1_1_manager_1_1_entity_manager}{Entity\+Manager} \texorpdfstring{$\vert$}{|} {\ttfamily nullptr}. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Reference to the Sparse\+Set for type T.
+\end{DoxyReturn}
+\begin{DoxyNote}{Note}
+This is a raw method to get the entity manager, its already handled via the \doxylink{class_f_e_c_s_1_1_registry}{Registry}. 
+\end{DoxyNote}
+\Hypertarget{class_f_e_c_s_1_1_manager_1_1_component_manager_afe58a0838fd44137a3062811adb89622}\index{FECS::Manager::ComponentManager@{FECS::Manager::ComponentManager}!GetVersion@{GetVersion}}
+\index{GetVersion@{GetVersion}!FECS::Manager::ComponentManager@{FECS::Manager::ComponentManager}}
+\doxysubsubsection{\texorpdfstring{GetVersion()}{GetVersion()}}
+{\footnotesize\ttfamily \label{class_f_e_c_s_1_1_manager_1_1_component_manager_afe58a0838fd44137a3062811adb89622} 
+template$<$typename T$>$ \\
+static std\+::uint32\+\_\+t \& FECS\+::\+Manager\+::\+Component\+Manager\+::\+Get\+Version (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [static]}}
+
+
+
+Returns a per-\/type version reference for tracking changes. 
+
+Used to invalidate views and other systems when component data changes.
+
+
+\begin{DoxyTemplParams}{Template Parameters}
+{\em T} & The component type. \\
+\hline
+\end{DoxyTemplParams}
+\begin{DoxyReturn}{Returns}
+Reference to a static version counter. 
+\end{DoxyReturn}
+\Hypertarget{class_f_e_c_s_1_1_manager_1_1_component_manager_a127794c4a13c25c1e66f8ae15f394178}\index{FECS::Manager::ComponentManager@{FECS::Manager::ComponentManager}!Reserve@{Reserve}}
+\index{Reserve@{Reserve}!FECS::Manager::ComponentManager@{FECS::Manager::ComponentManager}}
+\doxysubsubsection{\texorpdfstring{Reserve()}{Reserve()}}
+{\footnotesize\ttfamily \label{class_f_e_c_s_1_1_manager_1_1_component_manager_a127794c4a13c25c1e66f8ae15f394178} 
+static void FECS\+::\+Manager\+::\+Component\+Manager\+::\+Reserve (\begin{DoxyParamCaption}\item[{std\+::size\+\_\+t}]{size}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [static]}}
+
+
+
+Reserves storage space for predicted number of component types. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em size} & Number of components to reserve for\\
+\hline
+\end{DoxyParams}
+\begin{DoxyNote}{Note}
+This is a raw method to reserve components, its already handled via the \doxylink{class_f_e_c_s_1_1_registry}{Registry}. 
+\end{DoxyNote}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+includes/fecs/manager/\mbox{\hyperlink{component__manager_8h}{component\+\_\+manager.\+h}}\end{DoxyCompactItemize}

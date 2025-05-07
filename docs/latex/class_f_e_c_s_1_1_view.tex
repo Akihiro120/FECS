@@ -1,0 +1,107 @@
+\doxysection{FECS\+::View\texorpdfstring{$<$}{<} Components \texorpdfstring{$>$}{>} Class Template Reference}
+\hypertarget{class_f_e_c_s_1_1_view}{}\label{class_f_e_c_s_1_1_view}\index{FECS::View$<$ Components $>$@{FECS::View$<$ Components $>$}}
+
+
+A view for iterating over entities that have all specified component types.  
+
+
+
+
+{\ttfamily \#include $<$view\+\_\+manager.\+h$>$}
+
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{class_f_e_c_s_1_1_view_af81842a06a11e983e946407aec5396a2}{View}} (\mbox{\hyperlink{class_f_e_c_s_1_1_manager_1_1_entity_manager}{Entity\+Manager}} \texorpdfstring{$\ast$}{*}entity\+Manager\+Pointer)
+\begin{DoxyCompactList}\small\item\em Constructs a \doxylink{class_f_e_c_s_1_1_view}{View} given a pointer to the \doxylink{types_8h_abf3962244e98187a2945549333981904}{Entity} Manager. \end{DoxyCompactList}\item 
+\Hypertarget{class_f_e_c_s_1_1_view_a1bacbea5d4969e99762f405750529157}\label{class_f_e_c_s_1_1_view_a1bacbea5d4969e99762f405750529157} 
+{\bfseries \texorpdfstring{$\sim$}{\string~}\+View} ()
+\begin{DoxyCompactList}\small\item\em Destructor. \end{DoxyCompactList}\item 
+{\footnotesize template$<$typename Func$>$ }\\void \mbox{\hyperlink{class_f_e_c_s_1_1_view_aa19d5fc8ccc7caccda1b7bcfb72d6361}{Each}} (Func \&\&fn)
+\begin{DoxyCompactList}\small\item\em Iterates over all entities in the view, Applying a function to each. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{class_f_e_c_s_1_1_view}{View}} \& \mbox{\hyperlink{class_f_e_c_s_1_1_view_a30b2caa755dbb2e7d69dc3522b007f13}{Reserve}} (std\+::size\+\_\+t size)
+\begin{DoxyCompactList}\small\item\em Optionally reserves space in the internal cache for predicted number of entities. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+\subsubsection*{template$<$typename... Components$>$\newline
+class FECS\+::\+View$<$ Components $>$}
+A view for iterating over entities that have all specified component types. 
+
+The \doxylink{class_f_e_c_s_1_1_view}{View} caches matching entities and automatically rebuilds the cache when component versioning changes (i.\+e, when entities/components are added or removed)
+
+
+\begin{DoxyTemplParams}{Template Parameters}
+{\em Components} & The component types to filter and access. \\
+\hline
+\end{DoxyTemplParams}
+
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\Hypertarget{class_f_e_c_s_1_1_view_af81842a06a11e983e946407aec5396a2}\index{FECS::View$<$ Components $>$@{FECS::View$<$ Components $>$}!View@{View}}
+\index{View@{View}!FECS::View$<$ Components $>$@{FECS::View$<$ Components $>$}}
+\doxysubsubsection{\texorpdfstring{View()}{View()}}
+{\footnotesize\ttfamily \label{class_f_e_c_s_1_1_view_af81842a06a11e983e946407aec5396a2} 
+template$<$typename... Components$>$ \\
+\mbox{\hyperlink{class_f_e_c_s_1_1_view}{FECS\+::\+View}}$<$ Components $>$\+::\+View (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{class_f_e_c_s_1_1_manager_1_1_entity_manager}{Entity\+Manager}} \texorpdfstring{$\ast$}{*}}]{entity\+Manager\+Pointer}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Constructs a \doxylink{class_f_e_c_s_1_1_view}{View} given a pointer to the \doxylink{types_8h_abf3962244e98187a2945549333981904}{Entity} Manager. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em entity\+Manager\+Pointer} & Pointer to the entity manager used by the registry. \\
+\hline
+\end{DoxyParams}
+\texorpdfstring{$<$}{<} Begin with an empty cache
+
+\doxysubsection{Member Function Documentation}
+\Hypertarget{class_f_e_c_s_1_1_view_aa19d5fc8ccc7caccda1b7bcfb72d6361}\index{FECS::View$<$ Components $>$@{FECS::View$<$ Components $>$}!Each@{Each}}
+\index{Each@{Each}!FECS::View$<$ Components $>$@{FECS::View$<$ Components $>$}}
+\doxysubsubsection{\texorpdfstring{Each()}{Each()}}
+{\footnotesize\ttfamily \label{class_f_e_c_s_1_1_view_aa19d5fc8ccc7caccda1b7bcfb72d6361} 
+template$<$typename... Components$>$ \\
+template$<$typename Func$>$ \\
+void \mbox{\hyperlink{class_f_e_c_s_1_1_view}{FECS\+::\+View}}$<$ Components $>$\+::\+Each (\begin{DoxyParamCaption}\item[{Func \&\&}]{fn}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Iterates over all entities in the view, Applying a function to each. 
+
+If any component pool has changed since the last iteration (tracking by versioning), the cache of entities is rebuilt.
+
+
+\begin{DoxyTemplParams}{Template Parameters}
+{\em Func} & A lambda expression with the signature {\ttfamily void(\doxylink{types_8h_abf3962244e98187a2945549333981904}{Entity}, Components\&...)}. \\
+\hline
+\end{DoxyTemplParams}
+
+\begin{DoxyParams}{Parameters}
+{\em fn} & The function to apply to each matching entity and its components. \\
+\hline
+\end{DoxyParams}
+\Hypertarget{class_f_e_c_s_1_1_view_a30b2caa755dbb2e7d69dc3522b007f13}\index{FECS::View$<$ Components $>$@{FECS::View$<$ Components $>$}!Reserve@{Reserve}}
+\index{Reserve@{Reserve}!FECS::View$<$ Components $>$@{FECS::View$<$ Components $>$}}
+\doxysubsubsection{\texorpdfstring{Reserve()}{Reserve()}}
+{\footnotesize\ttfamily \label{class_f_e_c_s_1_1_view_a30b2caa755dbb2e7d69dc3522b007f13} 
+template$<$typename... Components$>$ \\
+\mbox{\hyperlink{class_f_e_c_s_1_1_view}{View}} \& \mbox{\hyperlink{class_f_e_c_s_1_1_view}{FECS\+::\+View}}$<$ Components $>$\+::\+Reserve (\begin{DoxyParamCaption}\item[{std\+::size\+\_\+t}]{size}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Optionally reserves space in the internal cache for predicted number of entities. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em size} & The number of entries to reserve space for. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Reference to self (fluent interface). 
+\end{DoxyReturn}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+includes/fecs/manager/\mbox{\hyperlink{view__manager_8h}{view\+\_\+manager.\+h}}\end{DoxyCompactItemize}

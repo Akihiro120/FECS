@@ -1,0 +1,110 @@
+\doxysection{FECS\+::Container\+::ISparse\+Set Class Reference}
+\hypertarget{class_f_e_c_s_1_1_container_1_1_i_sparse_set}{}\label{class_f_e_c_s_1_1_container_1_1_i_sparse_set}\index{FECS::Container::ISparseSet@{FECS::Container::ISparseSet}}
+
+
+Interface for type-\/erased sparse sets.  
+
+
+
+
+{\ttfamily \#include $<$sparse\+\_\+set.\+h$>$}
+
+Inheritance diagram for FECS\+::Container\+::ISparse\+Set\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{class_f_e_c_s_1_1_container_1_1_i_sparse_set}
+\end{center}
+\end{figure}
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+virtual void \mbox{\hyperlink{class_f_e_c_s_1_1_container_1_1_i_sparse_set_a87dcae3cf1d2fbb770643d216888a6f7}{Remove}} (\mbox{\hyperlink{types_8h_abf3962244e98187a2945549333981904}{Entity}} e)=0
+\begin{DoxyCompactList}\small\item\em Removes the component of a given entity. \end{DoxyCompactList}\item 
+virtual void \mbox{\hyperlink{class_f_e_c_s_1_1_container_1_1_i_sparse_set_aec05add31f66777ae5a238ffd03e2b5a}{Clear}} ()=0
+\begin{DoxyCompactList}\small\item\em Clears all components in the pool. \end{DoxyCompactList}\item 
+virtual void \mbox{\hyperlink{class_f_e_c_s_1_1_container_1_1_i_sparse_set_ad66b1347b67c996061c31196088fb2a4}{Set\+Entity\+Manager}} (\mbox{\hyperlink{class_f_e_c_s_1_1_manager_1_1_entity_manager}{Manager\+::\+Entity\+Manager}} \texorpdfstring{$\ast$}{*}m)=0
+\begin{DoxyCompactList}\small\item\em Sets the owning \doxylink{class_f_e_c_s_1_1_manager_1_1_entity_manager}{Entity\+Manager} for the pool. \end{DoxyCompactList}\item 
+virtual \mbox{\hyperlink{class_f_e_c_s_1_1_manager_1_1_entity_manager}{Manager\+::\+Entity\+Manager}} \texorpdfstring{$\ast$}{*} \mbox{\hyperlink{class_f_e_c_s_1_1_container_1_1_i_sparse_set_a3920eefb3ccc71a61fada2ae9ca7a69a}{Get\+Entity\+Manager}} ()=0
+\begin{DoxyCompactList}\small\item\em Gets the \doxylink{class_f_e_c_s_1_1_manager_1_1_entity_manager}{Entity\+Manager} associated with this pool. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Interface for type-\/erased sparse sets. 
+
+Allows uniform handling of component pools without knowing their type, useful in cleanup operations. 
+
+\doxysubsection{Member Function Documentation}
+\Hypertarget{class_f_e_c_s_1_1_container_1_1_i_sparse_set_aec05add31f66777ae5a238ffd03e2b5a}\index{FECS::Container::ISparseSet@{FECS::Container::ISparseSet}!Clear@{Clear}}
+\index{Clear@{Clear}!FECS::Container::ISparseSet@{FECS::Container::ISparseSet}}
+\doxysubsubsection{\texorpdfstring{Clear()}{Clear()}}
+{\footnotesize\ttfamily \label{class_f_e_c_s_1_1_container_1_1_i_sparse_set_aec05add31f66777ae5a238ffd03e2b5a} 
+virtual void FECS\+::\+Container\+::\+ISparse\+Set\+::\+Clear (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [pure virtual]}}
+
+
+
+Clears all components in the pool. 
+
+
+
+Implemented in \mbox{\hyperlink{class_f_e_c_s_1_1_container_1_1_sparse_set_a7f4b429a49846eb6a51d638d06464123}{FECS\+::\+Container\+::\+Sparse\+Set$<$ T $>$}}.
+
+\Hypertarget{class_f_e_c_s_1_1_container_1_1_i_sparse_set_a3920eefb3ccc71a61fada2ae9ca7a69a}\index{FECS::Container::ISparseSet@{FECS::Container::ISparseSet}!GetEntityManager@{GetEntityManager}}
+\index{GetEntityManager@{GetEntityManager}!FECS::Container::ISparseSet@{FECS::Container::ISparseSet}}
+\doxysubsubsection{\texorpdfstring{GetEntityManager()}{GetEntityManager()}}
+{\footnotesize\ttfamily \label{class_f_e_c_s_1_1_container_1_1_i_sparse_set_a3920eefb3ccc71a61fada2ae9ca7a69a} 
+virtual \mbox{\hyperlink{class_f_e_c_s_1_1_manager_1_1_entity_manager}{Manager\+::\+Entity\+Manager}} \texorpdfstring{$\ast$}{*} FECS\+::\+Container\+::\+ISparse\+Set\+::\+Get\+Entity\+Manager (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [pure virtual]}}
+
+
+
+Gets the \doxylink{class_f_e_c_s_1_1_manager_1_1_entity_manager}{Entity\+Manager} associated with this pool. 
+
+\begin{DoxyReturn}{Returns}
+Pointer to the \doxylink{class_f_e_c_s_1_1_manager_1_1_entity_manager}{Entity\+Manager}. 
+\end{DoxyReturn}
+
+
+Implemented in \mbox{\hyperlink{class_f_e_c_s_1_1_container_1_1_sparse_set_a4a64140d5dca801677c3359bbcda49f3}{FECS\+::\+Container\+::\+Sparse\+Set$<$ T $>$}}.
+
+\Hypertarget{class_f_e_c_s_1_1_container_1_1_i_sparse_set_a87dcae3cf1d2fbb770643d216888a6f7}\index{FECS::Container::ISparseSet@{FECS::Container::ISparseSet}!Remove@{Remove}}
+\index{Remove@{Remove}!FECS::Container::ISparseSet@{FECS::Container::ISparseSet}}
+\doxysubsubsection{\texorpdfstring{Remove()}{Remove()}}
+{\footnotesize\ttfamily \label{class_f_e_c_s_1_1_container_1_1_i_sparse_set_a87dcae3cf1d2fbb770643d216888a6f7} 
+virtual void FECS\+::\+Container\+::\+ISparse\+Set\+::\+Remove (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{types_8h_abf3962244e98187a2945549333981904}{Entity}}}]{e}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [pure virtual]}}
+
+
+
+Removes the component of a given entity. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em e} & The entity associated with the component. \\
+\hline
+\end{DoxyParams}
+
+
+Implemented in \mbox{\hyperlink{class_f_e_c_s_1_1_container_1_1_sparse_set_a3c2ce8e40f53ffa5e2e4e0d2d2421ed2}{FECS\+::\+Container\+::\+Sparse\+Set$<$ T $>$}}.
+
+\Hypertarget{class_f_e_c_s_1_1_container_1_1_i_sparse_set_ad66b1347b67c996061c31196088fb2a4}\index{FECS::Container::ISparseSet@{FECS::Container::ISparseSet}!SetEntityManager@{SetEntityManager}}
+\index{SetEntityManager@{SetEntityManager}!FECS::Container::ISparseSet@{FECS::Container::ISparseSet}}
+\doxysubsubsection{\texorpdfstring{SetEntityManager()}{SetEntityManager()}}
+{\footnotesize\ttfamily \label{class_f_e_c_s_1_1_container_1_1_i_sparse_set_ad66b1347b67c996061c31196088fb2a4} 
+virtual void FECS\+::\+Container\+::\+ISparse\+Set\+::\+Set\+Entity\+Manager (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{class_f_e_c_s_1_1_manager_1_1_entity_manager}{Manager\+::\+Entity\+Manager}} \texorpdfstring{$\ast$}{*}}]{m}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [pure virtual]}}
+
+
+
+Sets the owning \doxylink{class_f_e_c_s_1_1_manager_1_1_entity_manager}{Entity\+Manager} for the pool. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em m} & Pointer to the \doxylink{class_f_e_c_s_1_1_manager_1_1_entity_manager}{Entity\+Manager}. \\
+\hline
+\end{DoxyParams}
+
+
+Implemented in \mbox{\hyperlink{class_f_e_c_s_1_1_container_1_1_sparse_set_a0868c80097b6350236db9bc17a1f1235}{FECS\+::\+Container\+::\+Sparse\+Set$<$ T $>$}}.
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+includes/fecs/containers/\mbox{\hyperlink{sparse__set_8h}{sparse\+\_\+set.\+h}}\end{DoxyCompactItemize}

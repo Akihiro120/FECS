@@ -1,0 +1,105 @@
+\doxysection{FECS\+::Manager\+::Entity\+Manager Class Reference}
+\hypertarget{class_f_e_c_s_1_1_manager_1_1_entity_manager}{}\label{class_f_e_c_s_1_1_manager_1_1_entity_manager}\index{FECS::Manager::EntityManager@{FECS::Manager::EntityManager}}
+
+
+Manages entity lifecycle, including creation, destruction, and version tracking.  
+
+
+
+
+{\ttfamily \#include $<$entity\+\_\+manager.\+h$>$}
+
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{class_f_e_c_s_1_1_manager_1_1_entity_manager_a631639ee6d914a9e5e598b3da64868db}\label{class_f_e_c_s_1_1_manager_1_1_entity_manager_a631639ee6d914a9e5e598b3da64868db} 
+{\bfseries Entity\+Manager} ()
+\begin{DoxyCompactList}\small\item\em Constructs an empty \doxylink{class_f_e_c_s_1_1_manager_1_1_entity_manager}{Entity\+Manager}. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{class_f_e_c_s_1_1_manager_1_1_entity_manager_ac7ef9fb4b18de6340f0e55834b16088a}{Reserve}} (std\+::uint32\+\_\+t amount)
+\begin{DoxyCompactList}\small\item\em Pre-\/allocates memory for a number of entities. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{types_8h_abf3962244e98187a2945549333981904}{Entity}} \mbox{\hyperlink{class_f_e_c_s_1_1_manager_1_1_entity_manager_a6d8df0ad5e6126dd9dc5b835cad19d25}{Create}} ()
+\begin{DoxyCompactList}\small\item\em Creates a new \doxylink{types_8h_abf3962244e98187a2945549333981904}{Entity}. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{class_f_e_c_s_1_1_manager_1_1_entity_manager_a3deadc5db79f31ea3f8b3ce3c3bfd7ed}{Destroy}} (\mbox{\hyperlink{types_8h_abf3962244e98187a2945549333981904}{Entity}} e)
+\begin{DoxyCompactList}\small\item\em Destroys and entity and recycles its index. \end{DoxyCompactList}\item 
+bool \mbox{\hyperlink{class_f_e_c_s_1_1_manager_1_1_entity_manager_a26d34ac946190fc27d7a0be93193e633}{Is\+Alive}} (\mbox{\hyperlink{types_8h_abf3962244e98187a2945549333981904}{Entity}} e) const
+\begin{DoxyCompactList}\small\item\em Checks whether an entity is still valid (alive). \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Manages entity lifecycle, including creation, destruction, and version tracking. 
+
+This class handles entity ID allocation using a freelist-\/based approach. It also maintains versioning for safe validation of entity references. 
+
+\doxysubsection{Member Function Documentation}
+\Hypertarget{class_f_e_c_s_1_1_manager_1_1_entity_manager_a6d8df0ad5e6126dd9dc5b835cad19d25}\index{FECS::Manager::EntityManager@{FECS::Manager::EntityManager}!Create@{Create}}
+\index{Create@{Create}!FECS::Manager::EntityManager@{FECS::Manager::EntityManager}}
+\doxysubsubsection{\texorpdfstring{Create()}{Create()}}
+{\footnotesize\ttfamily \label{class_f_e_c_s_1_1_manager_1_1_entity_manager_a6d8df0ad5e6126dd9dc5b835cad19d25} 
+\mbox{\hyperlink{types_8h_abf3962244e98187a2945549333981904}{Entity}} FECS\+::\+Manager\+::\+Entity\+Manager\+::\+Create (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Creates a new \doxylink{types_8h_abf3962244e98187a2945549333981904}{Entity}. 
+
+If there are free slots available from destroyed entities, they are reused. Otherwise, a new index is assigned.
+
+\begin{DoxyReturn}{Returns}
+A new valid \doxylink{types_8h_abf3962244e98187a2945549333981904}{Entity} ID with embedded version. 
+\end{DoxyReturn}
+\texorpdfstring{$<$}{<} First version is always 0\Hypertarget{class_f_e_c_s_1_1_manager_1_1_entity_manager_a3deadc5db79f31ea3f8b3ce3c3bfd7ed}\index{FECS::Manager::EntityManager@{FECS::Manager::EntityManager}!Destroy@{Destroy}}
+\index{Destroy@{Destroy}!FECS::Manager::EntityManager@{FECS::Manager::EntityManager}}
+\doxysubsubsection{\texorpdfstring{Destroy()}{Destroy()}}
+{\footnotesize\ttfamily \label{class_f_e_c_s_1_1_manager_1_1_entity_manager_a3deadc5db79f31ea3f8b3ce3c3bfd7ed} 
+void FECS\+::\+Manager\+::\+Entity\+Manager\+::\+Destroy (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{types_8h_abf3962244e98187a2945549333981904}{Entity}}}]{e}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Destroys and entity and recycles its index. 
+
+The version at the entity\textquotesingle{}s index is incremented to invalidate old references.
+
+
+\begin{DoxyParams}{Parameters}
+{\em e} & The entity to destroy. \\
+\hline
+\end{DoxyParams}
+\Hypertarget{class_f_e_c_s_1_1_manager_1_1_entity_manager_a26d34ac946190fc27d7a0be93193e633}\index{FECS::Manager::EntityManager@{FECS::Manager::EntityManager}!IsAlive@{IsAlive}}
+\index{IsAlive@{IsAlive}!FECS::Manager::EntityManager@{FECS::Manager::EntityManager}}
+\doxysubsubsection{\texorpdfstring{IsAlive()}{IsAlive()}}
+{\footnotesize\ttfamily \label{class_f_e_c_s_1_1_manager_1_1_entity_manager_a26d34ac946190fc27d7a0be93193e633} 
+bool FECS\+::\+Manager\+::\+Entity\+Manager\+::\+Is\+Alive (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{types_8h_abf3962244e98187a2945549333981904}{Entity}}}]{e}{}\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Checks whether an entity is still valid (alive). 
+
+An entity is considered alive if its version matches the stored version.
+
+
+\begin{DoxyParams}{Parameters}
+{\em e} & The entity to check. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Returns true if the entity is alive, false otherwise 
+\end{DoxyReturn}
+\Hypertarget{class_f_e_c_s_1_1_manager_1_1_entity_manager_ac7ef9fb4b18de6340f0e55834b16088a}\index{FECS::Manager::EntityManager@{FECS::Manager::EntityManager}!Reserve@{Reserve}}
+\index{Reserve@{Reserve}!FECS::Manager::EntityManager@{FECS::Manager::EntityManager}}
+\doxysubsubsection{\texorpdfstring{Reserve()}{Reserve()}}
+{\footnotesize\ttfamily \label{class_f_e_c_s_1_1_manager_1_1_entity_manager_ac7ef9fb4b18de6340f0e55834b16088a} 
+void FECS\+::\+Manager\+::\+Entity\+Manager\+::\+Reserve (\begin{DoxyParamCaption}\item[{std\+::uint32\+\_\+t}]{amount}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Pre-\/allocates memory for a number of entities. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em amount} & Number of entities to reserve space for. \\
+\hline
+\end{DoxyParams}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+includes/fecs/manager/\mbox{\hyperlink{entity__manager_8h}{entity\+\_\+manager.\+h}}\end{DoxyCompactItemize}
