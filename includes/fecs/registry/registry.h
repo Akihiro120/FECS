@@ -177,10 +177,11 @@ namespace FECS
          * @return A View object for iterating over matching entities.
          */
         template <typename... C>
-        FECS::View<C...> View()
+        FECS::View<C...>& View()
         {
             // Create and return the view created
-            return FECS::View<C...>(&m_EntityManager);
+            static FECS::View<C...> v = FECS::View<C...>(&m_EntityManager);
+            return v;
         }
 
     private:
