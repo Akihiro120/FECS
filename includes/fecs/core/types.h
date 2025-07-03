@@ -34,7 +34,7 @@ namespace FECS
     static constexpr Entity INVALID_ENTITY = std::numeric_limits<Entity>::max();
 
     /// @brief Defines the number of entities per sparse set page.
-    static constexpr std::size_t SPARSE_PAGE_SIZE = FECS_SPARSE_PAGE_SIZE;
+    static constexpr size_t SPARSE_PAGE_SIZE = FECS_SPARSE_PAGE_SIZE;
 
     /// @brief Number of bits used to store the entity index (lower 20 bits).
     static constexpr std::uint32_t INDEX_BITS = 20;
