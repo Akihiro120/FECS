@@ -51,7 +51,7 @@ int main()
         .Each([&](FECS::Entity e, Position& p, Velocity& v)
     {
         int hp = registry.Get<Health>(e).hp;
-        std::cout << "Entity " << e << "has HP=" << hp << std::endl;
+        std::cout << "Entity " << e << " has HP=" << hp << std::endl;
     });
 
     // view with exclusion: exclude those with Health
