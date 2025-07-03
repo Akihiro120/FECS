@@ -9,6 +9,7 @@
 #include <fecs/manager/component_manager.h>
 #include <fecs/manager/entity_manager.h>
 #include <array>
+#include <functional>
 #include <tuple>
 #include <utility>
 
@@ -35,13 +36,18 @@ namespace FECS
          * @param entityManagerPointer Pointer to the entity manager used by the registry.
          */
         View(EntityManager* entityManagerPointer)
-            : m_Pools(&ComponentManager::GetPool<Components>(entityManagerPointer)...),
+            : m_EntityManager(entityManagerPointer),
+              m_Pools(&ComponentManager::GetPool<Components>(entityManagerPointer)...),
               m_LastVersions{},
+              m_FilterPredicate{},
               m_GlobalVersion(false),
               m_CacheBuilt(false)
         {
             m_Cache = {};
             m_Cache.clear(); ///< Begin with an empty cache
+
+            // reserve a minimum of 16 entities
+            m_Cache.reserve(16);
         }
 
         /**
@@ -49,6 +55,45 @@ namespace FECS
          */
         ~View()
         {
+        }
+
+        /**
+         * @brief Add a "must have" filter for component type T.
+         * @tparam T A component type that entities must have.
+         * @return A new View with the filter appended.
+         */
+        template <typename T>
+        View<Components...> With() const
+        {
+            // static_assert((std::is_same_v<T, Components> || ...),
+            // "With<T> filter must refer to one of the existing component types or other known pools");
+            View copy = *this;
+            // Capture the pool pointer by value for the lambda
+            auto& pool = ComponentManager::GetPool<T>(m_EntityManager);
+            copy.m_FilterPredicate.emplace_back(
+                [pool](Entity e)
+            { return pool.Has(e); });
+            copy.m_CacheBuilt = false;
+            return copy;
+        }
+
+        /**
+         * @brief Add a "must not have" filter for component type T.
+         * @tparam T A component type that entities must NOT have.
+         * @return A new View with the exclusion filter appended.
+         */
+        template <typename T>
+        View<Components...> Without() const
+        {
+            // static_assert((std::is_same_v<T, Components> || ...),
+            // "Without<T> filter must refer to one of the existing component types or other known pools");
+            View copy = *this;
+            auto& pool = ComponentManager::GetPool<T>(m_EntityManager);
+            copy.m_FilterPredicate.emplace_back(
+                [pool](Entity e)
+            { return !pool.Has(e); });
+            copy.m_CacheBuilt = false;
+            return copy;
         }
 
         /**
@@ -106,6 +151,13 @@ namespace FECS
             {
                 Invoke(std::forward<Func>(fn), e, std::make_index_sequence<N>{});
             }
+
+            // TODO: This might add some overhead, consider in future to move towards compile time instead of runtime.
+            if (!m_FilterPredicate.empty())
+            {
+                m_FilterPredicate.clear();
+                m_CacheBuilt = false;
+            }
         }
 
         /**
@@ -147,6 +199,18 @@ namespace FECS
                 if (!HasAll<DriverIdx>(e))
                     continue;
 
+                bool ok = true;
+                for (auto& pred : m_FilterPredicate)
+                {
+                    if (!pred(e))
+                    {
+                        ok = false;
+                        break;
+                    }
+                }
+
+                if (!ok)
+                    continue;
                 m_Cache.push_back(e);
             }
         }
@@ -180,5 +244,7 @@ namespace FECS
         std::array<size_t, N> m_LastVersions{}; ///< Last known versions of each component type.
         std::size_t m_GlobalVersion = 0;        ///< Version used for global invalidation.
         std::vector<Entity> m_Cache;            ///< Cached list of matching entities.
+        std::vector<std::function<bool(Entity)>> m_FilterPredicate;
+        EntityManager* m_EntityManager;
     };
 }

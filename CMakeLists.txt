@@ -14,3 +14,4 @@ target_include_directories(${PROJECT_NAME} INTERFACE ${FECS_INCLUDE_DIRS})
 
 add_subdirectory(examples/benchmark)
 add_subdirectory(examples/tests)
+add_subdirectory(examples/querying)
