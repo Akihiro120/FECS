@@ -3,6 +3,7 @@ build/
 run
 .DS_Store
 CMakePresets.json
+docs/
 
 # run scripts
 run.bat
