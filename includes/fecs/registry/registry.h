@@ -184,6 +184,33 @@ namespace FECS
             return v;
         }
 
+        /**
+         * @brief Retrieves the first instance of a specified component type from the registry.
+         *
+         * This template function searches the registry for any entity that contains
+         * the component of type C and returns a pointer to that component. Iteration
+         * stops as soon as the first match is found. If no entity with component C
+         * exists, nullptr is returned.
+         *
+         * @tparam C The component type to retrieve.
+         * @return Pointer to the component instance of type C, or nullptr if not found.
+         *
+         * @note
+         *    This performs at most one component lookup per call. For repeated access,
+         *    consider caching the returned pointer.
+         */
+        template <typename C>
+        C* Ctx()
+        {
+            C* result = nullptr;
+            View<C>().Each([&](Entity, C& c)
+            {
+                result = &c;
+                return false;
+            });
+            return result;
+        }
+
     private:
         Manager::EntityManager m_EntityManager; ///< The internal entity manager.
     };
