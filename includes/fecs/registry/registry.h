@@ -211,6 +211,30 @@ namespace FECS
             return result;
         }
 
+        /**
+         * @brief Retrieves the first entity containing the specified component type.
+         *
+         * Iterates over all entities that have a component of type C and returns
+         * the ID of the first one found. If no such entity exists, returns
+         * INVALID_ENTITY.
+         *
+         * @tparam C
+         *    The component type to search for.
+         * @return
+         *    The first entity ID that has component C, or INVALID_ENTITY if none is found.
+         */
+        template <typename C>
+        FECS::Entity EntityCtx()
+        {
+            FECS::Entity result = INVALID_ENTITY;
+            View<C>().Each([&](FECS::Entity id, C&)
+            {
+                result = id;
+                return false;
+            });
+            return result;
+        }
+
     private:
         Manager::EntityManager m_EntityManager; ///< The internal entity manager.
     };
