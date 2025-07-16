@@ -247,11 +247,11 @@ namespace FECS
          * @return C&           Reference to the component instance on the entity.
          */
         template <typename C>
-        C& GetOrAttach(FECS::Entity id)
+        C& GetOrAttach(FECS::Entity id, const C& component)
         {
             if (!Has<C>(id))
             {
-                Attach<C>(id);
+                Attach<C>(id, component);
             }
             return Get<C>(id);
         }
