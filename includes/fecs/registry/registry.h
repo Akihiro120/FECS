@@ -235,6 +235,27 @@ namespace FECS
             return result;
         }
 
+        /**
+         * @brief  Retrieve a component of type C for an entity, attaching it if not already present.
+         *
+         * This is a convenience wrapper around Has<T>, Attach<T> and Get<T>.
+         * If the entity does not yet have a T, a default-constructed T is attached;
+         * otherwise the existing component is returned.
+         *
+         * @tparam C            The component type to retrieve or attach.
+         * @param  id           The entity identifier.
+         * @return C&           Reference to the component instance on the entity.
+         */
+        template <typename C>
+        C& GetOrAttach(FECS::Entity id)
+        {
+            if (!Has<C>(id))
+            {
+                Attach<C>(id);
+            }
+            return Get<C>(id);
+        }
+
     private:
         Manager::EntityManager m_EntityManager; ///< The internal entity manager.
     };
