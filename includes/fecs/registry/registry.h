@@ -15,10 +15,11 @@ namespace FECS
 
     /**
      * @class Registry
-     * @brief Acts as a main interface for the ECS, manages a `**Local**` environment for entities, and component manipulation
+     * @brief Acts as a main interface for the ECS, manages a environment for entities, and component manipulation.
      *
      * The registry handes entity creation and destruction, component attachment/detachment,
      * exposes access to Component Pool and Views
+     * NOTE: All registries share the same component pool. This is an intended function.
      */
     class Registry
     {
@@ -29,6 +30,10 @@ namespace FECS
         Registry()
         {
         }
+
+        // ====================================================================
+        //                         ENTITY MANAGEMENT
+        // ====================================================================
 
         /**
          * @brief Creates a new Entity
@@ -75,41 +80,9 @@ namespace FECS
             return m_EntityManager;
         }
 
-        /**
-         * @brief Reserve a predicted amount of components
-         * @param size The number of predicted components
-         */
-        void Reserve(std::size_t size)
-        {
-            // Reserve the number of components to be used
-            ComponentManager::Reserve(size);
-        }
-
-        /**
-         * @brief Registers a new Component Type and returns its Pool
-         * @tparam T The component type.
-         * @return Reference to the component's SparseSet pool.
-         */
-        template <typename T>
-        Container::SparseSet<T>& RegisterComponent()
-        {
-            // Register the component
-            return ComponentManager::GetPool<T>(&m_EntityManager);
-        }
-
-        /**
-         * @brief Retrieves the pool for a given component type.
-         * @tparam T The component type.
-         * @return Reference to the component's Sparse Set pool.
-         * @note This function may pay the allocation cost for the component pool
-         * use `RegisterComponent<T>()` to avoid that cost.
-         */
-        template <typename T>
-        Container::SparseSet<T>& GetPool()
-        {
-            // Get the component, and register it if it doesnt exist already
-            return ComponentManager::GetPool<T>(&m_EntityManager);
-        }
+        // ====================================================================
+        //                         COMPONENT MANAGEMENT
+        // ====================================================================
 
         /**
          * @brief Attachs a component to an entity
@@ -129,6 +102,24 @@ namespace FECS
         }
 
         /**
+         * @brief Emplaces a component to an entity
+         * @tparam T The component type.
+         * @param e The target entity.
+         * @param args The args to attach.
+         */
+        template <typename T, typename... Args>
+        T& Emplace(Entity e, Args&&... args)
+        {
+            Container::SparseSet<T>& set = ComponentManager::GetPool<T>(&m_EntityManager);
+            T& component = set.Emplace(e, std::forward<Args>(args)...);
+
+            // Update the component's version to signal
+            ComponentManager::GetVersion<T>()++;
+
+            return component;
+        }
+
+        /**
          * @brief Retrieves a component reference attached to an entity.
          * @tparam T The component type.
          * @param e The target entity.
@@ -140,6 +131,23 @@ namespace FECS
             // Get the component pool, and return the component associated with the entity
             Container::SparseSet<T>& set = ComponentManager::GetPool<T>(&m_EntityManager);
             return set.Get(e);
+        }
+
+        /**
+         * @brief Safely retrieves a component pointer attached to an entity.
+         * @tparam T The component type.
+         * @param e The target entity.
+         * @return Pointer to the component, or nullptr if it doesn't exist.
+         */
+        template <typename T>
+        T* TryGet(Entity e)
+        {
+            if (!Has<T>(e))
+            {
+                return nullptr;
+            }
+            // We know it exists, so this Get<T> call is safe
+            return &Get<T>(e);
         }
 
         /**
@@ -171,36 +179,19 @@ namespace FECS
             return set.Has(e);
         }
 
-        /**
-         * @brief Creates a view for the specified component types.
-         * @tparam C... The component types to include in the view.
-         * @return A View object for iterating over matching entities.
-         */
-        template <typename... C>
-        FECS::View<C...>& View()
-        {
-            // Create and return the view created
-            static FECS::View<C...> v = FECS::View<C...>(&m_EntityManager);
-            return v;
-        }
+        // ====================================================================
+        //                       SINGLETON & CONTEXT
+        // ====================================================================
 
         /**
-         * @brief Retrieves the first instance of a specified component type from the registry.
-         *
-         * This template function searches the registry for any entity that contains
-         * the component of type C and returns a pointer to that component. Iteration
-         * stops as soon as the first match is found. If no entity with component C
-         * exists, nullptr is returned.
+         * @brief Retrieves the first instance of a specified component type.
          *
          * @tparam C The component type to retrieve.
          * @return Pointer to the component instance of type C, or nullptr if not found.
-         *
-         * @note
-         *    This performs at most one component lookup per call. For repeated access,
-         *    consider caching the returned pointer.
          */
         template <typename C>
         C* Ctx()
+
         {
             C* result = nullptr;
             View<C>().Each([&](Entity, C& c)
@@ -209,6 +200,31 @@ namespace FECS
                 return false;
             });
             return result;
+        }
+
+        /**
+         * @brief Retrieves the first instance of a component, creating it if none exists.
+         *
+         * Useful for singleton/context components (e.g., Time, PhysicsSettings).
+         * If no entity has component C, a new entity is created and C is
+         * emplaced on it.
+         *
+         * @tparam C The component type.
+         * @tparam Args... Constructor argument types if creating.
+         * @return Reference to the component instance.
+         */
+        template <typename C, typename... Args>
+        C& GetOrCreateSingleton(Args&&... args)
+        {
+            C* component = Ctx<C>();
+            if (component)
+            {
+                return *component;
+            }
+
+            // Not found, create one
+            Entity newSingletonEntity = CreateEntity();
+            return Emplace<C>(newSingletonEntity, std::forward<Args>(args)...);
         }
 
         /**
@@ -235,25 +251,84 @@ namespace FECS
             return result;
         }
 
+        // ====================================================================
+        //                         CONVENIENCE FUNCTIONS
+        // ====================================================================
+
         /**
-         * @brief  Retrieve a component of type C for an entity, attaching it if not already present.
-         *
-         * This is a convenience wrapper around Has<T>, Attach<T> and Get<T>.
-         * If the entity does not yet have a T, a default-constructed T is attached;
-         * otherwise the existing component is returned.
-         *
-         * @tparam C            The component type to retrieve or attach.
-         * @param  id           The entity identifier.
-         * @return C&           Reference to the component instance on the entity.
+         * @brief Retrieve a component, or default-construct it if not already present.
+         * @tparam C The component type (must be default-constructible).
+         * @param id The entity identifier.
+         * @return Reference to the component.
          */
         template <typename C>
-        C& GetOrAttach(FECS::Entity id, const C& component)
+        C& GetOrAttach(FECS::Entity id)
         {
             if (!Has<C>(id))
             {
-                Attach<C>(id, component);
+                return Emplace<C>(id);
             }
             return Get<C>(id);
+        }
+
+        /**
+         * @brief Retrieve a component, or emplace-construct it with args if not present.
+         * @tparam C The component type.
+         * @param id The entity identifier.
+         * @param args... Arguments for C's constructor.
+         * @return Reference to the component.
+         */
+        template <typename C, typename... Args>
+        C& GetOrAttach(FECS::Entity id, Args&&... args)
+        {
+            if (!Has<C>(id))
+            {
+                return Emplace<C>(id, std::forward<Args>(args)...);
+            }
+            return Get<C>(id);
+        }
+
+        // ====================================================================
+        //                           ITERATION & VIEWS
+        // ====================================================================
+
+        /**
+         * @brief Creates a view for the specified component types.
+         * @tparam C... The component types to include in the view.
+         * @return A View object for iterating over matching entities.
+         */
+        template <typename... C>
+        FECS::View<C...>& View()
+        {
+            // Create and return the view created
+            static FECS::View<C...> v = FECS::View<C...>(&m_EntityManager);
+            return v;
+        }
+
+        // ====================================================================
+        //                         MEMORY MANAGEMENT
+        // ====================================================================
+
+        /**
+         * @brief Reserve a predicted amount of components
+         * @param size The number of predicted components
+         */
+        void Reserve(std::size_t size)
+        {
+            // Reserve the number of components to be used
+            ComponentManager::Reserve(size);
+        }
+
+        /**
+         * @brief Registers a new Component Type and returns its Pool
+         * @tparam T The component type.
+         * @return Reference to the component's SparseSet pool.
+         */
+        template <typename T>
+        Container::SparseSet<T>& RegisterComponent()
+        {
+            // Register the component
+            return ComponentManager::GetPool<T>(&m_EntityManager);
         }
 
     private:
