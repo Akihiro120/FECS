@@ -65,6 +65,15 @@ namespace FECS
             {
             }
 
+            ~SparseSet()
+            {
+                for (auto* page : m_Sparse)
+                {
+                    delete page;
+                }
+                m_Sparse.clear();
+            }
+
             /**
              * @brief Inserts or overrides a component for an entity,
              * @param e The entity.
@@ -88,6 +97,64 @@ namespace FECS
                 {
                     // override
                     m_Dense[slot] = component;
+                }
+            }
+
+            /**
+             * @brief Inserts or overrides a component for an entity, via move
+             * @param e The entity.
+             * @param component The component data
+             */
+            inline void Insert(Entity e, T&& component)
+            {
+                assert(m_EntityManager->IsAlive(e) && "Cannot Assign to Dead Entity");
+                std::uint32_t idx = FECS::GetEntityIndex(e);
+
+                auto& slot = SparseSlot(idx);
+
+                if (slot == NPOS)
+                {
+                    // new
+                    slot = m_Dense.size();
+                    m_DenseEntities.push_back(e);
+                    m_Dense.push_back(std::move(component));
+                }
+                else
+                {
+                    // override
+                    m_Dense[slot] = std::move(component);
+                }
+            }
+
+            /**
+             * @brief Emplaces a component for an entity, constructing it in-place.
+             * @tparam Args... The types of arguments for T's constructor.
+             * @param e The entity.
+             * @param args... The arguments for T's constructor.
+             * @return Reference to the newly created/emplaced component.
+             */
+            template <typename... Args>
+            inline T& Emplace(Entity e, Args&... args)
+            {
+                assert(m_EntityManager->IsAlive(e) && "Cannot Assign to Dead Entity");
+                std::uint32_t idx = FECS::GetEntityIndex(e);
+
+                auto& slot = SparseSlot(idx);
+
+                if (slot == NPOS)
+                {
+                    // new
+                    slot = m_Dense.size();
+                    m_DenseEntities.push_back(std::move(e));
+                    m_Dense.emplace_back(std::forward<Args>(args)...);
+
+                    return m_Dense[slot];
+                }
+                else
+                {
+                    // override
+                    m_Dense[slot] = T(std::forward<Args>(args)...);
+                    return m_Dense[slot];
                 }
             }
 
