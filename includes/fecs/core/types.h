@@ -8,6 +8,7 @@
 
 #pragma once
 #include <cstdint>
+#include <cstddef>
 #include <limits>
 
 /// @brief Defines the default number of elements per sparse page, if not specified
