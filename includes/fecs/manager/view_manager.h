@@ -69,10 +69,10 @@ namespace FECS
             // "With<T> filter must refer to one of the existing component types or other known pools");
             View copy = *this;
             // Capture the pool pointer by value for the lambda
-            auto& pool = ComponentManager::GetPool<T>(m_EntityManager);
+            auto* pool = &ComponentManager::GetPool<T>(m_EntityManager);
             copy.m_FilterPredicate.emplace_back(
                 [pool](Entity e)
-            { return pool.Has(e); });
+            { return pool->Has(e); });
             copy.m_CacheBuilt = false;
             return copy;
         }
@@ -88,7 +88,7 @@ namespace FECS
             // static_assert((std::is_same_v<T, Components> || ...),
             // "Without<T> filter must refer to one of the existing component types or other known pools");
             View copy = *this;
-            auto& pool = ComponentManager::GetPool<T>(m_EntityManager);
+            auto* pool = &ComponentManager::GetPool<T>(m_EntityManager);
             copy.m_FilterPredicate.emplace_back(
                 [pool](Entity e)
             { return !pool.Has(e); });
