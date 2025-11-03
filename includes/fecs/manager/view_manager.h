@@ -91,7 +91,7 @@ namespace FECS
             auto* pool = &ComponentManager::GetPool<T>(m_EntityManager);
             copy.m_FilterPredicate.emplace_back(
                 [pool](Entity e)
-            { return !pool.Has(e); });
+            { return !pool->Has(e); });
             copy.m_CacheBuilt = false;
             return copy;
         }
