@@ -1,12 +1,19 @@
-#include <fecs/fecs.h>
-#include <iostream>
+#include <FECS/FECS.h>
 
-int main()
+struct Position
 {
-    FECS::Entity id = FECS::Entities()->Create();
-    FECS::Components()->Attach<std::uint32_t>(id, 32);
+    float x = 0.0f;
+    float y = 0.0f;
+};
 
-    std::cout << FECS::Components()->Get<std::uint32_t>(id) << std::endl;
+auto CreatePlayer(FECS::World& world) -> void
+{
+    FECS::Entity e = world.Entities().Create();
+}
+
+auto main() -> int
+{
+    FECS::World world = FECS::Init();
 
     return 0;
 }
