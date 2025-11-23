@@ -1,8 +1,9 @@
 #pragma once
 #include <cstdint>
-#include <fecs/core/types.h>
-#include <fecs/containers/sparse_set.h>
-#include <fecs/manager/entity_manager.h>
+#include <vector>
+#include "FECS/Core/Types.h"
+#include "FECS/Containers/ISparseSet.h"
+#include "FECS/Containers/SparseSet.h"
 
 namespace
 {
