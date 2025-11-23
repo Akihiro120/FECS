@@ -1,9 +1,10 @@
 #pragma once
 #include <cassert>
 #include <array>
+#include <vector>
 
-#include "fecs/core/Types.h"
-#include "fecs/containers/ISparseSet.h"
+#include "FECS/Core/Types.h"
+#include "FECS/Containers/ISparseSet.h"
 
 namespace FECS::Container
 {
