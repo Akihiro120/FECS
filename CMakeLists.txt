@@ -2,9 +2,12 @@ cmake_minimum_required(VERSION 3.25)
 project(FECS LANGUAGES CXX)
 
 set (CMAKE_CXX_STANDARD 23)
-add_library(${PROJECT_NAME} INTERFACE)
+add_library(${PROJECT_NAME}
+    src/FECS/World.cpp
+    src/FECS/Manager/EntityManager.cpp
+)
 
-target_include_directories(${PROJECT_NAME} INTERFACE
+target_include_directories(${PROJECT_NAME} PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
