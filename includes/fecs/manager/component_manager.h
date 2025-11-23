@@ -1,116 +1,84 @@
-/**
- * @file component_manager.h
- * @brief Manages component pools and provides utility functions for component lifecycle operations.
- */
-
 #pragma once
+#include <cstdint>
 #include <fecs/core/types.h>
 #include <fecs/containers/sparse_set.h>
 #include <fecs/manager/entity_manager.h>
 
-namespace FECS
+namespace
 {
-    namespace Manager
+    class ComponentIndex
     {
-        /**
-         * @brief Provides static access to component pools and handles entity cleanup
-         *
-         * The ComponentManager is a singleton-like utility with static methods and per-type
-         * static storage (via Templates) to manage components, and versions efficiently.
-         */
-        class ComponentManager
+    public:
+        template <typename T>
+        static std::uint32_t GetIndex()
         {
-        private:
-            /// Stores all component pools as ISparseSet pointers for type-erased operations.
-            inline static std::vector<Container::ISparseSet*> m_RegisteredComponents;
+            static const std::uint32_t idx = m_Index++;
+            return idx;
+        }
 
-            /// Private constructor to prevent instantiation.
-            ComponentManager() = default;
+    private:
+        static inline std::uint32_t m_Index = 0;
+    };
+}
 
-        public:
-            /**
-             * @brief Get the component pool for a specific component type.
-             *
-             * If the pool doesnt exist yet, it's created and registered.
-             *
-             * @tparam T The component type.
-             * @param manager Pointer to the EntityManager | `nullptr`.
-             * @return Reference to the SparseSet for type T.
-             *
-             * @note This is a raw method to get the entity manager, its already handled via the Registry.
-             */
-            template <typename T>
-            static Container::SparseSet<T>&
-            GetPool(EntityManager* manager)
+namespace FECS::Manager
+{
+    class ComponentManager
+    {
+    public:
+        ComponentManager() = default;
+
+        template <typename T>
+        Container::SparseSet<T>& GetPool(EntityManager* manager)
+        {
+            std::uint32_t idx = ::ComponentIndex::GetIndex<T>();
+            if (m_Components.size() <= idx)
             {
-                static Container::SparseSet<T> pool;
-
-                // If the pool hasn't been initialized yet, set its EntityManager and register it.
-                if (!pool.GetEntityManager())
-                {
-                    m_RegisteredComponents.push_back(&pool);
-                    pool.SetEntityManager(manager);
-                }
-                return pool;
+                Container::SparseSet<T> newStorage = new Container::SparseSet<T>();
+                m_Components.push_back(newStorage);
             }
 
-            /**
-             * @brief Returns a per-type version reference for tracking changes.
-             *
-             * Used to invalidate views and other systems when component data changes.
-             *
-             * @tparam T The component type.
-             * @return Reference to a static version counter.
-             */
-            template <typename T>
-            static std::uint32_t& GetVersion()
+            return m_Components[idx];
+        }
+
+        template <typename T>
+        std::uint32_t& GetVersion()
+        {
+            std::uint32_t idx = ::ComponentIndex::GetIndex<T>();
+            if (m_Versions.size() <= idx)
             {
-                static std::uint32_t version;
-                return version;
+                m_Versions.push_back(0);
             }
 
-            /**
-             * @brief Reserves storage space for predicted number of component types.
-             *
-             * @param size Number of components to reserve for
-             *
-             * @note This is a raw method to reserve components, its already handled via the Registry.
-             */
-            static void Reserve(std::size_t size)
+            return m_Versions[idx];
+        }
+
+        void Reserve(std::size_t numComponents)
+        {
+            m_Components.reserve(numComponents);
+        }
+
+        void DeleteEntity(Entity e)
+        {
+            for (auto& comps : m_Components)
             {
-                m_RegisteredComponents.reserve(size);
+                comps->Remove(e);
+            }
+        }
+
+        void ClearRegistry()
+        {
+            for (auto& comps : m_Components)
+            {
+                comps->Clear();
             }
 
-            /**
-             * @brief Removes an entity from all registered component pools.
-             *
-             * Used during entity destruction to clean up attached components.
-             *
-             * @param e The entity to remove.
-             */
-            static void DeleteEntity(Entity e)
-            {
-                for (auto& comps : m_RegisteredComponents)
-                {
-                    comps->Remove(e);
-                }
-            }
+            m_Components.clear();
+            m_Versions.clear();
+        }
 
-            /**
-             * @brief Clears all component pools and resets internal state.
-             *
-             * Typically used in testing or to reset the ECS state.
-             */
-            static void ClearRegistry()
-            {
-                for (auto& comps : m_RegisteredComponents)
-                {
-                    comps->SetEntityManager(nullptr);
-                    comps->Clear();
-                }
-
-                m_RegisteredComponents.clear();
-            }
-        };
-    }
+    private:
+        std::vector<Container::ISparseSet*> m_Components;
+        std::vector<std::uint32_t> m_Versions;
+    };
 }
