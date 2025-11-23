@@ -34,18 +34,6 @@ namespace FECS
              * @brief Clears all components in the pool.
              */
             virtual void Clear() = 0;
-
-            /**
-             * @brief Sets the owning EntityManager for the pool.
-             * @param m Pointer to the EntityManager.
-             */
-            virtual void SetEntityManager(Manager::EntityManager* m) = 0;
-
-            /**
-             * @brief Gets the EntityManager associated with this pool.
-             * @return Pointer to the EntityManager.
-             */
-            virtual Manager::EntityManager* GetEntityManager() = 0;
         };
 
         /**
@@ -81,7 +69,6 @@ namespace FECS
              */
             inline void Insert(Entity e, const T& component)
             {
-                assert(m_EntityManager->IsAlive(e) && "Cannot Assign to Dead Entity");
                 std::uint32_t idx = FECS::GetEntityIndex(e);
 
                 auto& slot = SparseSlot(idx);
@@ -107,7 +94,6 @@ namespace FECS
              */
             inline void Insert(Entity e, T&& component)
             {
-                assert(m_EntityManager->IsAlive(e) && "Cannot Assign to Dead Entity");
                 std::uint32_t idx = FECS::GetEntityIndex(e);
 
                 auto& slot = SparseSlot(idx);
@@ -136,7 +122,6 @@ namespace FECS
             template <typename... Args>
             inline T& Emplace(Entity e, Args&... args)
             {
-                assert(m_EntityManager->IsAlive(e) && "Cannot Assign to Dead Entity");
                 std::uint32_t idx = FECS::GetEntityIndex(e);
 
                 auto& slot = SparseSlot(idx);
@@ -164,7 +149,6 @@ namespace FECS
              */
             inline virtual void Remove(Entity e) override
             {
-                assert(m_EntityManager->IsAlive(e) && "Cannot Remove from Dead Entity");
                 std::uint32_t idx = FECS::GetEntityIndex(e);
 
                 auto& slot = SparseSlot(idx);
@@ -209,7 +193,6 @@ namespace FECS
              */
             inline T& Get(Entity e)
             {
-                assert(m_EntityManager->IsAlive(e) && "Cannot Get on Dead Entity");
                 assert(Has(e) && "Component not Present");
                 std::uint32_t idx = GetEntityIndex(e);
                 auto* page = PageFor(idx);
@@ -224,7 +207,6 @@ namespace FECS
              */
             inline const T& Get(Entity e) const
             {
-                assert(m_EntityManager->IsAlive(e) && "Cannot Get on Dead Entity");
                 assert(Has(e) && "Component not Present");
                 std::uint32_t idx = GetEntityIndex(e);
                 auto* page = PageFor(idx);
@@ -275,24 +257,6 @@ namespace FECS
 
                 m_Dense.reserve(amount);
                 m_DenseEntities.reserve(amount);
-            }
-
-            /**
-             * @brief Assigns the EntityManager used for liveness checks.
-             * @param m Pointer to the EntityManager.
-             */
-            virtual void SetEntityManager(Manager::EntityManager* m) override
-            {
-                m_EntityManager = m;
-            }
-
-            /**
-             * @brief Returns the EntityManager associated with this pool.
-             * @return Pointer to the EntityManager.
-             */
-            virtual Manager::EntityManager* GetEntityManager() override
-            {
-                return m_EntityManager;
             }
 
             /**
@@ -349,19 +313,9 @@ namespace FECS
                 return m_Sparse[p];
             }
 
-            /// Returns the const page pointer for a given index.
-            const std::array<std::uint32_t, SPARSE_PAGE_SIZE>* PageFor(std::uint32_t idx) const
-            {
-                std::uint32_t p = GetPageIndex(idx);
-                if (p >= m_Sparse.size())
-                    return nullptr;
-                return m_Sparse[p];
-            }
-
             std::vector<T> m_Dense;                                             ///< Densely packed component values.
             std::vector<Entity> m_DenseEntities;                                ///< Entity IDs parallel to m_Dense.
             std::vector<std::array<std::uint32_t, SPARSE_PAGE_SIZE>*> m_Sparse; ///< Page sparse array of indices.
-            Manager::EntityManager* m_EntityManager;                            ///< Pointer to the entity manager
         };
     }
 }
