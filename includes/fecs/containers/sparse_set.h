@@ -175,7 +175,7 @@ namespace FECS
              * @param e The entity.
              * @return true if the component exists
              */
-            inline bool Has(Entity e) const
+            inline bool Has(Entity e)
             {
                 uint32_t idx = FECS::GetEntityIndex(e);
                 if (auto* page = PageFor(idx))
@@ -228,7 +228,7 @@ namespace FECS
              * @param i The index
              * @return The entity ID.
              */
-            inline Entity EntityAt(std::uint32_t i) const
+            inline Entity EntityAt(std::uint32_t i)
             {
                 return m_DenseEntities[i];
             }
