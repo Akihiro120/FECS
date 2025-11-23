@@ -27,18 +27,26 @@ namespace FECS::Manager
     {
     public:
         ComponentManager() = default;
+        ~ComponentManager()
+        {
+            // clear all heap allocated memory
+            for (auto* components : m_Components)
+            {
+                delete components;
+            }
+        }
 
         template <typename T>
-        Container::SparseSet<T>& GetPool(EntityManager* manager)
+        Container::SparseSet<T>* GetPool()
         {
             std::uint32_t idx = ::ComponentIndex::GetIndex<T>();
             if (m_Components.size() <= idx)
             {
-                Container::SparseSet<T> newStorage = new Container::SparseSet<T>();
+                Container::SparseSet<T>* newStorage = new Container::SparseSet<T>();
                 m_Components.push_back(newStorage);
             }
 
-            return m_Components[idx];
+            return reinterpret_cast<Container::SparseSet<T>*>(m_Components[idx]);
         }
 
         template <typename T>
