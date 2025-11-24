@@ -64,10 +64,31 @@ namespace FECS::Builder
         }
 
         template <typename T>
+        inline auto Ensure(const T& defaultValue) -> EntityBuilder&
+        {
+            if (!p_ComponentManager->Has<T>(m_ModifiedEntity))
+            {
+                p_ComponentManager->Attach<T>(m_ModifiedEntity, defaultValue);
+            }
+
+            return *this;
+        }
+
+        template <typename T>
         inline auto Patch(std::function<void(T&)> func) -> EntityBuilder&
         {
             T& component = p_ComponentManager->Get<T>(m_ModifiedEntity);
             func(component);
+            return *this;
+        }
+
+        inline auto When(bool condition, std::function<void(EntityBuilder&)> func) -> EntityBuilder&
+        {
+            if (condition)
+            {
+                func(*this);
+            }
+
             return *this;
         }
 
