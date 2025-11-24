@@ -1,4 +1,4 @@
-#include <fecs/fecs.h>
+#include <FECS/FECS.h>
 
 struct Position
 {
