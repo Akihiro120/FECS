@@ -1,7 +1,3 @@
-#include "fecs/core/types.h"
-#include "fecs/registry/registry.h"
-#include <iostream>
-#include <fecs/fecs.h>
 
 struct Position
 {

@@ -1,3 +1,4 @@
+#include "FECS/Core/Types.h"
 #include <FECS/FECS.h>
 
 struct Position
@@ -8,7 +9,10 @@ struct Position
 
 auto CreatePlayer(FECS::World& world) -> void
 {
-    FECS::Entity e = world.Entities().Create();
+    FECS::Entity e = world.Entities()
+                         .Create()
+                         .Attach<unsigned int>(32)
+                         .Build();
 }
 
 auto main() -> int

@@ -1,24 +1,27 @@
 #pragma once
-#include <fecs/core/types.h>
-#include <vector>
+#include <memory>
+#include "FECS/Builder/EntityBuilder.h"
+#include "FECS/Manager/ComponentManager.h"
+#include "FECS/Containers/EntityStorage.h"
 
 namespace FECS::Manager
 {
     class EntityManager
     {
     public:
-        EntityManager();
+        EntityManager(std::shared_ptr<ComponentManager> manager)
+            : p_ComponentManager(manager)
+        {
+        }
 
-        auto Reserve(std::uint32_t amount) -> void;
-
-        auto Create() -> Entity;
-
-        auto Destroy(Entity e) -> void;
-
-        auto IsAlive(Entity e) const -> bool;
+        auto Create() -> Builder::EntityBuilder
+        {
+            Entity id = m_EntityStorage.Create();
+            return Builder::EntityBuilder(id, p_ComponentManager);
+        }
 
     private:
-        std::vector<std::uint32_t> m_Versions;
-        std::vector<std::uint32_t> m_FreeList;
+        std::shared_ptr<ComponentManager> p_ComponentManager;
+        Container::EntityStorage m_EntityStorage;
     };
 }
