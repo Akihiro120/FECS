@@ -1,5 +1,6 @@
 #pragma once
 #include <memory>
+#include "FECS/Core/Types.h"
 #include "FECS/Builder/EntityBuilder.h"
 #include "FECS/Manager/ComponentManager.h"
 #include "FECS/Containers/EntityStorage.h"
@@ -18,6 +19,17 @@ namespace FECS::Manager
         {
             Entity id = m_EntityStorage.Create();
             return Builder::EntityBuilder(id, p_ComponentManager);
+        }
+
+        auto Modify(Entity id) -> Builder::EntityBuilder
+        {
+            return Builder::EntityBuilder(id, p_ComponentManager);
+        }
+
+        auto Delete(Entity id) -> void
+        {
+            m_EntityStorage.Destroy(id);
+            p_ComponentManager->DetachAllFromEntity(id);
         }
 
     private:
