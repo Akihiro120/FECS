@@ -50,9 +50,24 @@ namespace FECS::Builder
             return *this;
         }
 
+        template <typename T>
+        inline auto Detach() -> EntityBuilder&
+        {
+            p_ComponentManager->Detach<T>(m_ModifiedEntity);
+            return *this;
+        }
+
         inline auto Apply(std::function<void(EntityBuilder&)> func) -> EntityBuilder&
         {
             func(*this);
+            return *this;
+        }
+
+        template <typename T>
+        inline auto Patch(std::function<void(T&)> func) -> EntityBuilder&
+        {
+            T& component = p_ComponentManager->Get<T>(m_ModifiedEntity);
+            func(component);
             return *this;
         }
 
