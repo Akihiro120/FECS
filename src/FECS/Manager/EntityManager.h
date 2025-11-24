@@ -9,7 +9,7 @@ namespace FECS::Manager
     class EntityManager
     {
     public:
-        EntityManager(std::shared_ptr<ComponentManager> manager)
+        EntityManager(std::unique_ptr<ComponentManager>& manager)
             : p_ComponentManager(manager)
         {
         }
@@ -21,7 +21,7 @@ namespace FECS::Manager
         }
 
     private:
-        std::shared_ptr<ComponentManager> p_ComponentManager;
+        std::unique_ptr<ComponentManager>& p_ComponentManager;
         Container::EntityStorage m_EntityStorage;
     };
 }
