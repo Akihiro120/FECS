@@ -5,22 +5,19 @@
 #include "FECS/Containers/ISparseSet.h"
 #include "FECS/Containers/SparseSet.h"
 
-namespace
+class ComponentIndex
 {
-    class ComponentIndex
+public:
+    template <typename T>
+    static std::uint32_t GetIndex()
     {
-    public:
-        template <typename T>
-        static std::uint32_t GetIndex()
-        {
-            static const std::uint32_t idx = m_Index++;
-            return idx;
-        }
+        static const std::uint32_t idx = m_Index++;
+        return idx;
+    }
 
-    private:
-        static inline std::uint32_t m_Index = 0;
-    };
-}
+private:
+    static inline std::uint32_t m_Index = 0;
+};
 
 namespace FECS::Container
 {
@@ -33,7 +30,10 @@ namespace FECS::Container
             // clear all heap allocated memory
             for (auto* components : m_Components)
             {
-                delete components;
+                if (components)
+                {
+                    delete components;
+                }
             }
         }
 
@@ -41,22 +41,26 @@ namespace FECS::Container
         Container::SparseSet<T>* GetPool()
         {
             std::uint32_t idx = ::ComponentIndex::GetIndex<T>();
-            if (m_Components.size() <= idx)
+            if (idx >= m_Components.size())
             {
-                Container::SparseSet<T>* newStorage = new Container::SparseSet<T>();
-                m_Components.push_back(newStorage);
+                m_Components.resize(idx + 1, nullptr);
             }
 
-            return reinterpret_cast<Container::SparseSet<T>*>(m_Components[idx]);
+            if (!m_Components[idx])
+            {
+                m_Components[idx] = new Container::SparseSet<T>();
+            }
+
+            return static_cast<Container::SparseSet<T>*>(m_Components[idx]);
         }
 
         template <typename T>
         std::uint32_t& GetVersion()
         {
             std::uint32_t idx = ::ComponentIndex::GetIndex<T>();
-            if (m_Versions.size() <= idx)
+            if (idx >= m_Versions.size())
             {
-                m_Versions.push_back(0);
+                m_Versions.resize(idx + 1, 0);
             }
 
             return m_Versions[idx];

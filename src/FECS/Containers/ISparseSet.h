@@ -1,5 +1,5 @@
 #pragma once
-#include "fecs/core/Types.h"
+#include "FECS/Core/Types.h"
 
 namespace FECS::Container
 {
