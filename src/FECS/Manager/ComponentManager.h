@@ -12,31 +12,50 @@ namespace FECS::Manager
         ComponentManager() = default;
 
         template <typename T>
-        void Attach(Entity entity, const T& component)
+        auto Attach(Entity entity, const T& component) -> void
         {
             SparseSet<T>* pool = m_ComponentStorage.GetPool<T>();
             pool->Insert(entity, component);
         }
 
         template <typename T>
-        void Attach(Entity entity, T&& component)
+        auto Attach(Entity entity, T&& component) -> void
         {
             SparseSet<T>* pool = m_ComponentStorage.GetPool<T>();
             pool->Insert(entity, std::move(component));
         }
 
         template <typename T, typename... Args>
-        void Emplace(Entity entity, Args&&... args)
+        auto Emplace(Entity entity, Args&&... args) -> void
         {
             SparseSet<T>* pool = m_ComponentStorage.GetPool<T>();
             pool->Emplace(entity, std::forward<Args>(args)...);
         }
 
         template <typename T>
-        T& Get(Entity entity)
+        auto Detach(Entity entity) -> void
+        {
+            SparseSet<T>* pool = m_ComponentStorage.GetPool<T>();
+            pool->Remove(entity);
+        }
+
+        template <typename T>
+        auto Get(Entity entity) -> T&
         {
             SparseSet<T>* pool = m_ComponentStorage.GetPool<T>();
             return pool->Get(entity);
+        }
+
+        template <typename T>
+        auto Has(Entity entity) -> bool
+        {
+            SparseSet<T>* pool = m_ComponentStorage.GetPool<T>();
+            return pool->Has(entity);
+        }
+
+        auto DetachAllFromEntity(Entity entity) -> void
+        {
+            m_ComponentStorage.DeleteEntity(entity);
         }
 
     private:
