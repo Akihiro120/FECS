@@ -12,7 +12,7 @@ namespace FECS
     public:
         World()
         {
-            p_ComponentManager = std::make_shared<ComponentManager>();
+            p_ComponentManager = std::make_unique<ComponentManager>();
             p_EntityManager = std::make_unique<EntityManager>(p_ComponentManager);
         }
 
@@ -23,14 +23,14 @@ namespace FECS
             return *p_EntityManager;
         }
 
-        // auto Components() -> ComponentManager&
-        // {
-        //     return *p_ComponentManager;
-        // }
+        auto Components() -> ComponentManager&
+        {
+            return *p_ComponentManager;
+        }
 
     private:
         // managers
         std::unique_ptr<EntityManager> p_EntityManager;
-        std::shared_ptr<ComponentManager> p_ComponentManager;
+        std::unique_ptr<ComponentManager> p_ComponentManager;
     };
 }
