@@ -1,5 +1,3 @@
-#include "FECS/Builder/EntityBuilder.h"
-#include "FECS/Manager/ComponentManager.h"
 #include <iostream>
 #include <FECS/FECS.h>
 
@@ -14,17 +12,20 @@ std::ostream& operator<<(std::ostream& stream, Position& pos)
     return stream << "Position: {" << pos.x << ", " << pos.y << "}";
 }
 
-auto PlayerPrefab(FECS::Builder::EntityBuilder& builder) -> void
+namespace Prefabs
 {
-    builder
-        .Attach<Position>(Position{32.0f, 18.0f});
+    auto PlayerPrefab(FECS::Builder::EntityBuilder& builder) -> void
+    {
+        builder
+            .Attach<Position>(Position{32.0f, 18.0f});
+    }
 }
 
 auto CreatePlayer(FECS::World& world) -> FECS::Entity
 {
     FECS::Entity e = world.Entities()
                          .Create()
-                         .Apply(PlayerPrefab)
+                         .Apply(Prefabs::PlayerPrefab)
                          .Build();
 
     return e;
@@ -32,9 +33,13 @@ auto CreatePlayer(FECS::World& world) -> FECS::Entity
 
 auto ModifyPlayer(FECS::World& world, FECS::Entity entity) -> void
 {
-    // world.Entities()
-    //     .Modify(entity)
-    //     .Attach<Position>(Position{32.0f, 32.0f})
+    world.Entities()
+        .Modify(entity)
+        .Patch<Position>([](Position& position)
+    {
+        position.x = 128;
+        position.y = 256;
+    });
 }
 
 auto main() -> int
@@ -42,8 +47,10 @@ auto main() -> int
     FECS::World world = FECS::Init();
     FECS::Entity e = CreatePlayer(world);
 
-    Position& val = world.Components().Get<Position>(e);
-    std::cout << val << std::endl;
+    std::cout << world.Components().Get<Position>(e) << std::endl;
+
+    ModifyPlayer(world, e);
+    std::cout << world.Components().Get<Position>(e) << std::endl;
 
     return 0;
 }
