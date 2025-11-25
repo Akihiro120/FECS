@@ -58,6 +58,11 @@ namespace FECS::Manager
             m_ComponentStorage.DeleteEntity(entity);
         }
 
+        auto GetStorages() -> Container::ComponentStorage&
+        {
+            return m_ComponentStorage;
+        }
+
     private:
         Container::ComponentStorage m_ComponentStorage;
     };
