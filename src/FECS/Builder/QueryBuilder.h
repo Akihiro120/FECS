@@ -15,30 +15,33 @@ namespace FECS::Builder
     {
     public:
         QueryBuilder(std::unique_ptr<ComponentManager>& manager)
-            : p_ComponentManager(manager)
+            : p_ComponentManager(manager),
+              m_Pools(std::make_tuple(manager->GetStorages().GetPool<Components>()...))
         {
-            // construct the query
         }
         ~QueryBuilder() = default;
 
         template <typename Func>
         auto Each(Func queryFunction) -> void
         {
-            // get all the pools type erased via a tuple
-            auto dataPool = std::make_tuple(static_cast<SparseSet<Components>*>(
-                p_ComponentManager->GetStorages().GetPool<Components>())...);
+        }
+
+        template <typename T>
+        auto With() -> QueryBuilder<Components...>&
+        {
+            return *this;
+        }
+
+        template <typename T>
+        auto Without() -> QueryBuilder<Components...>&
+        {
+            return *this;
         }
 
     private:
-        template <typename Tuple, std::size_t... Is>
-        auto GetDriverSequence() -> void
-        {
-        }
+        using PoolTuple = std::tuple<SparseSet<Components>*...>;
 
-        auto GetDriver() -> void
-        {
-        }
-
+        PoolTuple m_Pools;
         std::unique_ptr<ComponentManager>& p_ComponentManager;
     };
 }
