@@ -1,5 +1,4 @@
 #pragma once
-#include <vector>
 #include <array>
 #include <tuple>
 #include "FECS/Containers/SparseSet.h"
@@ -17,7 +16,7 @@ namespace FECS::Builder
         struct PoolInfo
         {
             size_t size;
-            std::vector<Entity>* entities;
+            fast_vector<Entity>* entities;
         };
 
     public:
