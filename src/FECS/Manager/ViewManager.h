@@ -10,7 +10,7 @@ namespace FECS::Manager
     {
     public:
         ViewManager(std::unique_ptr<ComponentManager>& manager)
-            : p_ComponentManager(manager)
+            : p_ComponentManager(manager.get())
         {
         }
 
@@ -23,6 +23,6 @@ namespace FECS::Manager
         }
 
     private:
-        std::unique_ptr<ComponentManager>& p_ComponentManager;
+        ComponentManager* p_ComponentManager;
     };
 };

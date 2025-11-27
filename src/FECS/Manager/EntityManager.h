@@ -32,6 +32,11 @@ namespace FECS::Manager
             p_ComponentManager->DetachAllFromEntity(id);
         }
 
+        auto Reserve(size_t capacity) -> void
+        {
+            m_EntityStorage.Reserve(capacity);
+        }
+
     private:
         std::unique_ptr<ComponentManager>& p_ComponentManager;
         Container::EntityStorage m_EntityStorage;

@@ -53,6 +53,13 @@ namespace FECS::Manager
             return pool->Has(entity);
         }
 
+        template <typename T>
+        auto Reserve(size_t capacity) -> void
+        {
+            SparseSet<T>* pool = m_ComponentStorage.GetPool<T>();
+            pool->Reserve(capacity);
+        }
+
         auto DetachAllFromEntity(Entity entity) -> void
         {
             m_ComponentStorage.DeleteEntity(entity);
