@@ -1,6 +1,6 @@
 #pragma once
-#include <limits>
-#include <memory>
+#include <vector>
+#include <array>
 #include <tuple>
 #include "FECS/Containers/SparseSet.h"
 #include "FECS/Core/Types.h"
@@ -13,35 +13,51 @@ namespace FECS::Builder
     template <typename... Components>
     class QueryBuilder
     {
+    private:
+        struct PoolInfo
+        {
+            size_t size;
+            std::vector<Entity>* entities;
+        };
+
     public:
-        QueryBuilder(std::unique_ptr<ComponentManager>& manager)
+        QueryBuilder(ComponentManager* manager)
             : p_ComponentManager(manager),
-              m_Pools(std::make_tuple(manager->GetStorages().GetPool<Components>()...))
+              m_Pools(std::make_tuple(manager->GetStorages().template GetPool<Components>()...))
         {
         }
         ~QueryBuilder() = default;
 
         template <typename Func>
-        auto Each(Func queryFunction) -> void
+        auto Each(Func&& queryFunction) -> void
         {
-        }
+            std::array<PoolInfo, sizeof...(Components)> info = {
+                PoolInfo{
+                    std::get<SparseSet<Components>*>(m_Pools)->Size(),
+                    &std::get<SparseSet<Components>*>(m_Pools)->GetEntities()}...};
 
-        template <typename T>
-        auto With() -> QueryBuilder<Components...>&
-        {
-            return *this;
-        }
+            const PoolInfo* smallest = &info[0];
+            for (const auto& item : info)
+            {
+                if (item.size < smallest->size)
+                {
+                    smallest = &item;
+                }
+            }
 
-        template <typename T>
-        auto Without() -> QueryBuilder<Components...>&
-        {
-            return *this;
+            for (Entity e : *smallest->entities)
+            {
+                if ((std::get<SparseSet<Components>*>(m_Pools)->Has(e) && ...))
+                {
+                    queryFunction(e, std::get<SparseSet<Components>*>(m_Pools)->Get(e)...);
+                }
+            }
         }
 
     private:
         using PoolTuple = std::tuple<SparseSet<Components>*...>;
 
         PoolTuple m_Pools;
-        std::unique_ptr<ComponentManager>& p_ComponentManager;
+        ComponentManager* p_ComponentManager;
     };
 }
