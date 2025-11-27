@@ -26,11 +26,11 @@ public:
         auto duration_ms = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(end - start_).count();
         if (label_)
         {
-            std::printf("%s: %.10f ms\n", label_, duration_ms);
+            std::printf("%s: %.6f ms\n", label_, duration_ms);
         }
         else
         {
-            std::printf("Duration: %.3f ms\n", duration_ms);
+            std::printf("Duration: %.6f ms\n", duration_ms);
         }
     }
 
