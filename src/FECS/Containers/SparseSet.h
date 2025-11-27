@@ -3,6 +3,7 @@
 #include <array>
 #include <vector>
 
+#include "FECS/Containers/fast_vector.h"
 #include "FECS/Core/Types.h"
 #include "FECS/Containers/ISparseSet.h"
 
@@ -102,30 +103,36 @@ namespace FECS::Container
 
         inline bool Has(Entity e)
         {
-            uint32_t idx = FECS::GetEntityIndex(e);
-            if (auto* page = PageFor(idx))
+            uint32_t idx = GetEntityIndex(e);
+            uint32_t p = idx / SPARSE_PAGE_SIZE;
+
+            if (p < m_Sparse.size() && m_Sparse[p])
             {
-                return (*page)[GetPageOffset(idx)] != NPOS;
+                uint32_t offset = idx % SPARSE_PAGE_SIZE;
+                return (*m_Sparse[p])[offset] != NPOS;
             }
+
             return false;
         }
 
         inline T& Get(Entity e)
         {
-            assert(Has(e));
-            std::uint32_t idx = GetEntityIndex(e);
-            auto* page = PageFor(idx);
-            assert(page && (*page)[GetPageOffset(idx)] != NPOS);
-            return m_Dense[(*page)[GetPageOffset(idx)]];
+            assert(Has(e) && "Failed to retrive component, it doesn't exist on entity");
+            uint32_t idx = GetEntityIndex(e);
+            uint32_t p = idx / SPARSE_PAGE_SIZE;
+            uint32_t offset = idx % SPARSE_PAGE_SIZE;
+            uint32_t denseIdx = (*m_Sparse[p])[offset];
+            return m_Dense[denseIdx];
         }
 
         inline const T& Get(Entity e) const
         {
-            assert(Has(e));
-            std::uint32_t idx = GetEntityIndex(e);
-            auto* page = PageFor(idx);
-            assert(page && (*page)[GetPageOffset(idx)] != NPOS);
-            return m_Dense[(*page)[GetPageOffset(idx)]];
+            assert(Has(e) && "Failed to retrive component, it doesn't exist on entity");
+            uint32_t idx = GetEntityIndex(e);
+            uint32_t p = idx / SPARSE_PAGE_SIZE;
+            uint32_t offset = idx % SPARSE_PAGE_SIZE;
+            uint32_t denseIdx = (*m_Sparse[p])[offset];
+            return m_Dense[denseIdx];
         }
 
         inline std::size_t Size() const
@@ -171,13 +178,13 @@ namespace FECS::Container
             m_DenseEntities.clear();
         }
 
-        inline auto GetEntities() -> std::vector<Entity>&
+        inline auto GetEntities() -> fast_vector<Entity>&
         {
             return m_DenseEntities;
         }
 
         // Expose raw data for optimization
-        inline auto GetDataVector() -> std::vector<T>&
+        inline auto GetDataVector() -> fast_vector<T>&
         {
             return m_Dense;
         }
@@ -218,8 +225,8 @@ namespace FECS::Container
             return m_Sparse[p];
         }
 
-        std::vector<T> m_Dense;
-        std::vector<Entity> m_DenseEntities;
-        std::vector<std::array<std::uint32_t, SPARSE_PAGE_SIZE>*> m_Sparse;
+        fast_vector<T> m_Dense;
+        fast_vector<Entity> m_DenseEntities;
+        fast_vector<std::array<std::uint32_t, SPARSE_PAGE_SIZE>*> m_Sparse;
     };
 }
