@@ -3,6 +3,17 @@
 #include <chrono>
 #include <cstdio>
 
+template <typename T>
+inline void DoNotOptimize(const T& value)
+{
+    asm volatile("" : : "g"(value) : "memory");
+}
+
+#pragma once
+
+#include <chrono>
+#include <cstdio>
+
 class Benchmark
 {
 public:
@@ -15,7 +26,7 @@ public:
         auto duration_ms = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(end - start_).count();
         if (label_)
         {
-            std::printf("%s: %.3f ms\n", label_, duration_ms);
+            std::printf("%s: %.10f ms\n", label_, duration_ms);
         }
         else
         {
