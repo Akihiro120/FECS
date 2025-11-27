@@ -1,4 +1,5 @@
 #pragma once
+#include <algorithm>
 #include <cassert>
 #include <array>
 #include <vector>
@@ -151,7 +152,11 @@ namespace FECS::Container
 
             if (m_Sparse.size() < numPages)
             {
-                m_Sparse.resize(numPages, nullptr);
+                size_t newSize = numPages;
+                size_t oldSize = m_Sparse.size();
+                m_Sparse.resize(newSize);
+
+                std::fill(m_Sparse.begin() + oldSize, m_Sparse.end(), nullptr);
             }
 
             for (std::size_t p = 0; p < numPages; ++p)
@@ -195,7 +200,11 @@ namespace FECS::Container
             std::uint32_t p = GetPageIndex(idx);
             if (p >= m_Sparse.size())
             {
-                m_Sparse.resize(p + 1, nullptr);
+                size_t newSize = p + 1;
+                size_t oldSize = m_Sparse.size();
+                m_Sparse.resize(newSize);
+
+                std::fill(m_Sparse.begin() + oldSize, m_Sparse.end(), nullptr);
             }
 
             if (!m_Sparse[p])
