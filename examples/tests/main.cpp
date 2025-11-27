@@ -1,3 +1,4 @@
+#include <iostream>
 #include <FECS/FECS.h>
 
 struct Position
@@ -6,13 +7,23 @@ struct Position
     float y;
 };
 
+std::ostream& operator<<(std::ostream& stream, Position& pos)
+{
+    return stream << "Position: x:" << pos.x << ", y:" << pos.y;
+}
+
 struct Velocity
 {
     float x;
     float y;
 };
 
-#define MAX_ENTITIES 123
+std::ostream& operator<<(std::ostream& stream, Velocity& vel)
+{
+    return stream << "Velocity: x:" << vel.x << ", y:" << vel.y;
+}
+
+#define MAX_ENTITIES 5
 auto ConstructEntities(FECS::World& world) -> void
 {
     for (int i = 0; i < MAX_ENTITIES; i++)
@@ -38,9 +49,23 @@ auto main() -> int
     FECS::World world;
     ConstructEntities(world);
 
+    std::cout << "Position Entities" << std::endl;
+    world.View()
+        .Query<Position>()
+        .Each([](FECS::Entity id, Position& pos)
+    {
+        std::cout << id << " " << pos << std::endl;
+    });
+
+    std::cout << std::endl
+              << "Position & Velocity Entities" << std::endl;
     world.View()
         .Query<Position, Velocity>()
-        .Each([](FECS::Entity id, Position& pos, Velocity& vel) {});
+        .Each([](FECS::Entity id, Position& pos, Velocity& vel)
+    {
+        std::cout << id << " " << pos << std::endl;
+        std::cout << id << " " << vel << std::endl;
+    });
 
     return 0;
 }
