@@ -9,7 +9,7 @@ class ComponentIndex
 {
 public:
     template <typename T>
-    static std::uint32_t GetIndex()
+    static auto GetIndex() -> std::uint32_t
     {
         static const std::uint32_t idx = m_Index++;
         return idx;
@@ -38,7 +38,7 @@ namespace FECS::Container
         }
 
         template <typename T>
-        Container::SparseSet<T>* GetPool()
+        auto GetPool() -> Container::SparseSet<T>*
         {
             std::uint32_t idx = ::ComponentIndex::GetIndex<T>();
             if (idx >= m_Components.size())
@@ -55,7 +55,7 @@ namespace FECS::Container
         }
 
         template <typename T>
-        std::uint32_t& GetVersion()
+        auto GetVersion() -> std::uint32_t&
         {
             std::uint32_t idx = ::ComponentIndex::GetIndex<T>();
             if (idx >= m_Versions.size())
@@ -66,12 +66,12 @@ namespace FECS::Container
             return m_Versions[idx];
         }
 
-        void Reserve(std::size_t numComponents)
+        auto Reserve(std::size_t numComponents) -> void
         {
             m_Components.reserve(numComponents);
         }
 
-        void DeleteEntity(Entity e)
+        auto DeleteEntity(Entity e) -> void
         {
             for (auto& comps : m_Components)
             {
@@ -79,7 +79,7 @@ namespace FECS::Container
             }
         }
 
-        void ClearRegistry()
+        auto ClearRegistry() -> void
         {
             for (auto& comps : m_Components)
             {

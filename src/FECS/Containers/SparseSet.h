@@ -27,7 +27,7 @@ namespace FECS::Container
             m_Sparse.clear();
         }
 
-        inline void Insert(Entity e, const T& component)
+        inline auto Insert(Entity e, const T& component) -> void
         {
             std::uint32_t idx = FECS::GetEntityIndex(e);
             auto& slot = SparseSlot(idx);
@@ -44,7 +44,7 @@ namespace FECS::Container
             }
         }
 
-        inline void Insert(Entity e, T&& component)
+        inline auto Insert(Entity e, T&& component) -> void
         {
             std::uint32_t idx = FECS::GetEntityIndex(e);
             auto& slot = SparseSlot(idx);
@@ -62,7 +62,7 @@ namespace FECS::Container
         }
 
         template <typename... Args>
-        inline T& Emplace(Entity e, Args&... args)
+        inline auto Emplace(Entity e, Args&... args) -> T&
         {
             std::uint32_t idx = FECS::GetEntityIndex(e);
             auto& slot = SparseSlot(idx);
@@ -81,7 +81,7 @@ namespace FECS::Container
             }
         }
 
-        inline virtual void Remove(Entity e) override
+        inline virtual auto Remove(Entity e) -> void override
         {
             std::uint32_t idx = FECS::GetEntityIndex(e);
             auto& slot = SparseSlot(idx);
@@ -102,7 +102,7 @@ namespace FECS::Container
             slot = NPOS;
         }
 
-        inline bool Has(Entity e)
+        inline auto Has(Entity e) -> bool
         {
             uint32_t idx = GetEntityIndex(e);
             uint32_t p = idx / SPARSE_PAGE_SIZE;
@@ -116,7 +116,7 @@ namespace FECS::Container
             return false;
         }
 
-        inline T& Get(Entity e)
+        inline auto Get(Entity e) -> T&
         {
             assert(Has(e) && "Failed to retrive component, it doesn't exist on entity");
             uint32_t idx = GetEntityIndex(e);
@@ -126,7 +126,7 @@ namespace FECS::Container
             return m_Dense[denseIdx];
         }
 
-        inline const T& Get(Entity e) const
+        inline auto Get(Entity e) const -> const T&
         {
             assert(Has(e) && "Failed to retrive component, it doesn't exist on entity");
             uint32_t idx = GetEntityIndex(e);
@@ -136,17 +136,17 @@ namespace FECS::Container
             return m_Dense[denseIdx];
         }
 
-        inline std::size_t Size() const
+        inline auto Size() const -> std::size_t
         {
             return m_Dense.size();
         }
 
-        inline Entity EntityAt(std::uint32_t i)
+        inline auto EntityAt(std::uint32_t i) -> Entity
         {
             return m_DenseEntities[i];
         }
 
-        inline void Reserve(std::size_t amount)
+        inline auto Reserve(std::size_t amount) -> void
         {
             std::uint32_t numPages = (amount + SPARSE_PAGE_SIZE - 1) / SPARSE_PAGE_SIZE;
 
@@ -172,7 +172,7 @@ namespace FECS::Container
             m_DenseEntities.reserve(amount);
         }
 
-        inline virtual void Clear() override
+        inline virtual auto Clear() -> void override
         {
             for (auto page : m_Sparse)
             {
@@ -195,7 +195,7 @@ namespace FECS::Container
         }
 
     private:
-        std::uint32_t& SparseSlot(std::uint32_t idx)
+        auto SparseSlot(std::uint32_t idx) -> std::uint32_t&
         {
             std::uint32_t p = GetPageIndex(idx);
             if (p >= m_Sparse.size())
@@ -216,17 +216,17 @@ namespace FECS::Container
             return (*m_Sparse[p])[GetPageOffset(idx)];
         }
 
-        inline const std::uint32_t GetPageIndex(std::uint32_t idx) const
+        inline auto GetPageIndex(std::uint32_t idx) const -> const std::uint32_t
         {
             return idx / SPARSE_PAGE_SIZE;
         }
 
-        inline const std::uint32_t GetPageOffset(std::uint32_t idx) const
+        inline auto GetPageOffset(std::uint32_t idx) const -> const std::uint32_t
         {
             return idx % SPARSE_PAGE_SIZE;
         }
 
-        std::array<std::uint32_t, SPARSE_PAGE_SIZE>* PageFor(std::uint32_t idx)
+        auto PageFor(std::uint32_t idx) -> std::array<std::uint32_t, SPARSE_PAGE_SIZE>*
         {
             std::uint32_t p = GetPageIndex(idx);
             if (p >= m_Sparse.size())

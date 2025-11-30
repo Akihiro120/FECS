@@ -9,7 +9,7 @@
 // Helper functions
 
 template <class T>
-inline void construct_range(T* begin, T* end)
+inline auto construct_range(T* begin, T* end) -> void
 {
     while (begin != end)
     {
@@ -19,7 +19,7 @@ inline void construct_range(T* begin, T* end)
 }
 
 template <class T>
-inline void copy_range(T* begin, T* end, T* dest)
+inline auto copy_range(T* begin, T* end, T* dest) -> void
 {
     while (begin != end)
     {
@@ -30,7 +30,7 @@ inline void copy_range(T* begin, T* end, T* dest)
 }
 
 template <class T>
-inline void destruct_range(T* begin, T* end)
+inline auto destruct_range(T* begin, T* end) -> void
 {
     while (begin != end)
     {
@@ -54,46 +54,46 @@ public:
 
     // Element access
 
-    T& operator[](size_type pos);
-    const T& operator[](size_type pos) const;
+    auto operator[](size_type pos) -> T&;
+    auto operator[](size_type pos) const -> const T&;
 
-    T& front();
-    const T& front() const;
+    auto front() -> T&;
+    auto front() const -> const T&;
 
-    T& back();
-    const T& back() const;
+    auto back() -> T&;
+    auto back() const -> const T&;
 
-    T* data() noexcept;
-    const T* data() const noexcept;
+    auto data() noexcept -> T*;
+    auto data() const noexcept -> const T*;
 
     // Iterators
 
-    T* begin() noexcept;
-    const T* begin() const noexcept;
+    auto begin() noexcept -> T*;
+    auto begin() const noexcept -> const T*;
 
-    T* end() noexcept;
-    const T* end() const noexcept;
+    auto end() noexcept -> T*;
+    auto end() const noexcept -> const T*;
 
     // Capacity
 
-    bool empty() const noexcept;
-    size_type size() const noexcept;
-    void reserve(size_type new_cap);
-    size_type capacity() const noexcept;
-    void shrink_to_fit();
+    auto empty() const noexcept -> bool;
+    auto size() const noexcept -> size_type;
+    auto reserve(size_type new_cap) -> void;
+    auto capacity() const noexcept -> size_type;
+    auto shrink_to_fit() -> void;
 
     // Modifiers
 
-    void clear() noexcept;
+    auto clear() noexcept -> void;
 
-    void push_back(const T& value);
-    void push_back(T&& value);
+    auto push_back(const T& value) -> void;
+    auto push_back(T&& value) -> void;
 
     template <class... Args>
-    void emplace_back(Args&&... args);
+    auto emplace_back(Args&&... args) -> void;
 
-    void pop_back();
-    void resize(size_type count);
+    auto pop_back() -> void;
+    auto resize(size_type count) -> void;
 
     static constexpr size_type grow_factor = 2;
 
@@ -172,55 +172,55 @@ fast_vector<T>::~fast_vector()
 // Element access
 
 template <class T>
-T& fast_vector<T>::operator[](size_type pos)
+auto fast_vector<T>::operator[](size_type pos) -> T&
 {
     assert(pos < m_size && "Position is out of range");
     return m_data[pos];
 }
 
 template <class T>
-const T& fast_vector<T>::operator[](size_type pos) const
+auto fast_vector<T>::operator[](size_type pos) const -> const T&
 {
     assert(pos < m_size && "Position is out of range");
     return m_data[pos];
 }
 
 template <class T>
-T& fast_vector<T>::front()
+auto fast_vector<T>::front() -> T&
 {
     assert(m_size > 0 && "Container is empty");
     return m_data[0];
 }
 
 template <class T>
-const T& fast_vector<T>::front() const
+auto fast_vector<T>::front() const -> const T&
 {
     assert(m_size > 0 && "Container is empty");
     return m_data[0];
 }
 
 template <class T>
-T& fast_vector<T>::back()
+auto fast_vector<T>::back() -> T&
 {
     assert(m_size > 0 && "Container is empty");
     return m_data[m_size - 1];
 }
 
 template <class T>
-const T& fast_vector<T>::back() const
+auto fast_vector<T>::back() const -> const T&
 {
     assert(m_size > 0 && "Container is empty");
     return m_data[m_size - 1];
 }
 
 template <class T>
-T* fast_vector<T>::data() noexcept
+auto fast_vector<T>::data() noexcept -> T*
 {
     return m_data;
 }
 
 template <class T>
-const T* fast_vector<T>::data() const noexcept
+auto fast_vector<T>::data() const noexcept -> const T*
 {
     return m_data;
 }
@@ -228,25 +228,25 @@ const T* fast_vector<T>::data() const noexcept
 // Iterators
 
 template <class T>
-T* fast_vector<T>::begin() noexcept
+auto fast_vector<T>::begin() noexcept -> T*
 {
     return m_data;
 }
 
 template <class T>
-const T* fast_vector<T>::begin() const noexcept
+auto fast_vector<T>::begin() const noexcept -> const T*
 {
     return m_data;
 }
 
 template <class T>
-T* fast_vector<T>::end() noexcept
+auto fast_vector<T>::end() noexcept -> T*
 {
     return m_data + m_size;
 }
 
 template <class T>
-const T* fast_vector<T>::end() const noexcept
+auto fast_vector<T>::end() const noexcept -> const T*
 {
     return m_data + m_size;
 }
@@ -254,19 +254,19 @@ const T* fast_vector<T>::end() const noexcept
 // Capacity
 
 template <class T>
-bool fast_vector<T>::empty() const noexcept
+auto fast_vector<T>::empty() const noexcept -> bool
 {
     return m_size == 0;
 }
 
 template <class T>
-typename fast_vector<T>::size_type fast_vector<T>::size() const noexcept
+auto fast_vector<T>::size() const noexcept -> typename fast_vector<T>::size_type
 {
     return m_size;
 }
 
 template <class T>
-void fast_vector<T>::reserve(size_type new_cap)
+auto fast_vector<T>::reserve(size_type new_cap) -> void
 {
     assert(new_cap > m_capacity && "Capacity is already equal to or greater than the passed value");
 
@@ -292,13 +292,13 @@ void fast_vector<T>::reserve(size_type new_cap)
 }
 
 template <class T>
-typename fast_vector<T>::size_type fast_vector<T>::capacity() const noexcept
+auto fast_vector<T>::capacity() const noexcept -> typename fast_vector<T>::size_type
 {
     return m_capacity;
 }
 
 template <class T>
-void fast_vector<T>::shrink_to_fit()
+auto fast_vector<T>::shrink_to_fit() -> void
 {
     if (m_size < m_capacity)
     {
@@ -325,7 +325,7 @@ void fast_vector<T>::shrink_to_fit()
 // Modifiers
 
 template <class T>
-void fast_vector<T>::clear() noexcept
+auto fast_vector<T>::clear() noexcept -> void
 {
     if constexpr (!std::is_trivial_v<T>)
     {
@@ -336,7 +336,7 @@ void fast_vector<T>::clear() noexcept
 }
 
 template <class T>
-void fast_vector<T>::push_back(const T& value)
+auto fast_vector<T>::push_back(const T& value) -> void
 {
     if (m_size == m_capacity)
     {
@@ -356,7 +356,7 @@ void fast_vector<T>::push_back(const T& value)
 }
 
 template <class T>
-void fast_vector<T>::push_back(T&& value)
+auto fast_vector<T>::push_back(T&& value) -> void
 {
     if (m_size == m_capacity)
     {
@@ -377,7 +377,7 @@ void fast_vector<T>::push_back(T&& value)
 
 template <class T>
 template <class... Args>
-void fast_vector<T>::emplace_back(Args&&... args)
+auto fast_vector<T>::emplace_back(Args&&... args) -> void
 {
     static_assert(!std::is_trivial_v<T>, "Use push_back() instead of emplace_back() with trivial types");
 
@@ -392,7 +392,7 @@ void fast_vector<T>::emplace_back(Args&&... args)
 }
 
 template <class T>
-void fast_vector<T>::pop_back()
+auto fast_vector<T>::pop_back() -> void
 {
     assert(m_size > 0 && "Container is empty");
 
@@ -405,7 +405,7 @@ void fast_vector<T>::pop_back()
 }
 
 template <class T>
-void fast_vector<T>::resize(size_type count)
+auto fast_vector<T>::resize(size_type count) -> void
 {
     assert(count != m_size && "Size is already equal to the passed value");
 

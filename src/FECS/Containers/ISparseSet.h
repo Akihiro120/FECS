@@ -18,11 +18,11 @@ namespace FECS::Container
          * @brief Removes the component of a given entity.
          * @param e The entity associated with the component.
          */
-        virtual void Remove(Entity e) = 0;
+        virtual auto Remove(Entity e) -> void = 0;
 
         /**
          * @brief Clears all components in the pool.
          */
-        virtual void Clear() = 0;
+        virtual auto Clear() -> void = 0;
     };
 }
