@@ -61,7 +61,7 @@ namespace FECS
      * @param version The entity verison.
      * @return A composed 32-bit entity ID.
      */
-    inline Entity BuildEntityIndex(std::uint32_t index, std::uint32_t version)
+    inline auto BuildEntityIndex(std::uint32_t index, std::uint32_t version) -> Entity
     {
         return (version << INDEX_BITS) | (index & INDEX_MASK);
     }
@@ -71,7 +71,7 @@ namespace FECS
      * @param e The encoded entity ID.
      * @return The raw entity index.
      */
-    inline std::uint32_t GetEntityIndex(Entity e)
+    inline auto GetEntityIndex(Entity e) -> std::uint32_t
     {
         return e & INDEX_MASK;
     }
@@ -81,7 +81,7 @@ namespace FECS
      * @param e The encoded entity ID.
      * @return The version component of the entity.
      */
-    inline std::uint32_t GetEntityVersion(Entity e)
+    inline auto GetEntityVersion(Entity e) -> std::uint32_t
     {
         return (e & VERSION_MASK) >> INDEX_BITS;
     }
