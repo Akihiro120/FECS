@@ -12,31 +12,32 @@ struct ComponentOne
 struct ComponentTwo
 {
     int x;
-    int y;
 };
 
 struct ComponentThree
 {
     int x;
-    int y;
-    int z;
 };
 
 struct ComponentFour
 {
     int x;
-    int y;
-    int z;
-    int w;
 };
 
-#define NUM_ENTITIES 1000000
+#define NUM_ENTITIES 100
 using namespace FECS;
 
-// Times: Create Entities
-// 100 Entities
-// 10,000 Entities
-// 1,000,000 Entities
+// Operation	100 Entities (ms)	10,000 Entities (ms)	1,000,000 Entities (ms)
+// Create Entity	0.0021	0.0604	3.4217
+// Add Component	0.0145	0.1238	7.8212
+// Get Component	0.0003	0.0136	1.3510
+// Remove Component	0.0033	0.0549	5.9727
+// Delete Entity	0.0131	0.0676	5.9905
+// Query 2 Components	0.0003	0.0244	2.6986
+// Get 2 Components	0.0004	0.0249	2.4843
+// Query 4 Components	0.0015	0.0348	3.1150
+// Get 4 Components	0.0005	0.0497	4.9651
+
 auto Benchmark_CreateEntity(World& world, std::vector<Entity>& ids) -> void
 {
     Benchmark bm("Create Entity");
@@ -48,10 +49,6 @@ auto Benchmark_CreateEntity(World& world, std::vector<Entity>& ids) -> void
     }
 }
 
-// Times: Add Components
-// 100 Entities
-// 10,000 Entities
-// 1,000,000 Entities
 auto Benchmark_AddComponent(World& world, const std::vector<Entity>& ids) -> void
 {
     Benchmark bm("Add Component");
@@ -61,10 +58,6 @@ auto Benchmark_AddComponent(World& world, const std::vector<Entity>& ids) -> voi
     }
 }
 
-// Times: Get Component
-// 100 Entities
-// 10,000 Entities
-// 1,000,000 Entities
 auto Benchmark_GetComponent(World& world, const std::vector<Entity>& ids) -> void
 {
     Benchmark bm("Get Component");
@@ -74,10 +67,6 @@ auto Benchmark_GetComponent(World& world, const std::vector<Entity>& ids) -> voi
     }
 }
 
-// Times:
-// 100 Entities
-// 10,000 Entities
-// 1,000,000 Entities
 auto Benchmark_RemoveComponent(World& world, const std::vector<Entity>& ids) -> void
 {
     Benchmark bm("Remove Component");
@@ -87,10 +76,6 @@ auto Benchmark_RemoveComponent(World& world, const std::vector<Entity>& ids) -> 
     }
 }
 
-// Times: Delete Entities
-// 100 Entities
-// 10,000 Entities
-// 1,000,000 Entities
 auto Benchmark_DeleteEntity(World& world, const std::vector<Entity>& ids) -> void
 {
     Benchmark bm("Delete Entity");
@@ -100,11 +85,6 @@ auto Benchmark_DeleteEntity(World& world, const std::vector<Entity>& ids) -> voi
     }
 }
 
-// Times: Query (2 Components)
-// Times:
-// 100 Entities
-// 10,000 Entities
-// 1,000,000 Entities
 auto Benchmark_QueryTwoComponents(World& world) -> void
 {
     Benchmark bm("Query 2 components");
@@ -112,13 +92,13 @@ auto Benchmark_QueryTwoComponents(World& world) -> void
         .Query<ComponentOne, ComponentTwo>()
         .Each([](Entity id,
                  ComponentOne& one,
-                 ComponentTwo& two) {});
+                 ComponentTwo& two)
+    {
+        one.x++;
+        two.x++;
+    });
 }
 
-// Times: Get (2 Components)
-// 100 Entities
-// 10,000 Entities
-// 1,000,000 Entities
 auto Benchmark_GetTwoComponents(World& world, std::vector<Entity>& ids) -> void
 {
     Benchmark bm("Get 2 components");
@@ -129,11 +109,6 @@ auto Benchmark_GetTwoComponents(World& world, std::vector<Entity>& ids) -> void
     }
 }
 
-// Times: Query (4 Components)
-// Times:
-// 100 Entities
-// 10,000 Entities
-// 1,000,000 Entities
 auto Benchmark_QueryFourComponents(World& world) -> void
 {
     Benchmark bm("Query 4 components");
@@ -143,7 +118,13 @@ auto Benchmark_QueryFourComponents(World& world) -> void
                  ComponentOne& one,
                  ComponentTwo& two,
                  ComponentThree& three,
-                 ComponentFour& four) {});
+                 ComponentFour& four)
+    {
+        one.x++;
+        two.x++;
+        three.x++;
+        four.x++;
+    });
 }
 
 // Times: Get (4 Components)with the fast_vector.h
@@ -152,7 +133,7 @@ auto Benchmark_QueryFourComponents(World& world) -> void
 // 1,000,000 Entities
 auto Benchmark_GetFourComponents(World& world, std::vector<Entity>& ids) -> void
 {
-    Benchmark bm("Get 2 components");
+    Benchmark bm("Get 4 components");
     for (int i = 0; i < NUM_ENTITIES; i++)
     {
         world.Components().Get<ComponentOne>(ids[i]);
@@ -183,9 +164,9 @@ int main()
                           .Build();
 
         world.Components().Attach<ComponentOne>(entities[i], {1});
-        world.Components().Attach<ComponentTwo>(entities[i], {1, 1});
-        world.Components().Attach<ComponentThree>(entities[i], {1, 1, 1});
-        world.Components().Attach<ComponentFour>(entities[i], {1, 1, 1, 1});
+        world.Components().Attach<ComponentTwo>(entities[i], {1});
+        world.Components().Attach<ComponentThree>(entities[i], {1});
+        world.Components().Attach<ComponentFour>(entities[i], {1});
     }
 
     Benchmark_QueryTwoComponents(world);
