@@ -3,41 +3,28 @@
 #include "FECS/Manager/EntityManager.h"
 #include "FECS/Manager/ComponentManager.h"
 #include "FECS/Manager/ResourceManager.h"
-#include "FECS/Manager/ScheduleManager.h"
 #include "FECS/Manager/ViewManager.h"
 
 namespace FECS
 {
+    namespace Manager
+    {
+        class ScheduleManager;
+    }
+
     using namespace Manager;
 
     class World
     {
     public:
-        World()
-        {
-            p_ComponentManager = std::make_unique<ComponentManager>();
-            p_EntityManager = std::make_unique<EntityManager>(p_ComponentManager);
-            p_ResourceManager = std::make_unique<ResourceManager>();
-            p_ScheduleManager = std::make_unique<ScheduleManager>();
-            p_ViewManager = std::make_unique<ViewManager>(p_ComponentManager);
-        }
+        World();
+        ~World();
 
-        ~World() = default;
-
-        auto Entities() -> EntityManager&
-        {
-            return *p_EntityManager;
-        }
-
-        auto Components() -> ComponentManager&
-        {
-            return *p_ComponentManager;
-        }
-
-        auto View() -> ViewManager&
-        {
-            return *p_ViewManager;
-        }
+        auto Entities() -> EntityManager&;
+        auto Components() -> ComponentManager&;
+        auto View() -> ViewManager&;
+        auto Resources() -> ResourceManager&;
+        auto Scheduler() -> ScheduleManager&;
 
     private:
         // managers
