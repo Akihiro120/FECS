@@ -1,0 +1,35 @@
+#include "FECS/World.h"
+#include "FECS/Builder/QueryBuilder.h"
+
+namespace FECS::Internal
+{
+    template <typename T>
+    struct Resolver;
+
+    template <typename T>
+    struct Resolver<T&>
+    {
+        static auto Get(World& w) -> T&
+        {
+            return w.Resources().Get<T>();
+        }
+    };
+
+    template <typename T>
+    struct Resolver<const T&>
+    {
+        static auto Get(World& w) -> const T&
+        {
+            return w.Resources().Get<T>();
+        }
+    };
+
+    template <typename... Components>
+    struct Resolver<QueryBuilder<Components...>>
+    {
+        static auto Get(World& w) -> QueryBuilder<Components...>
+        {
+            return w.View().Query<Components...>();
+        }
+    };
+}
