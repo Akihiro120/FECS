@@ -24,6 +24,24 @@ namespace FECS::Internal
         }
     };
 
+    template <>
+    struct Resolver<World&>
+    {
+        static auto Get(World& w) -> World&
+        {
+            return w;
+        }
+    };
+
+    template <>
+    struct Resolver<const World&>
+    {
+        static auto Get(World& w) -> const World&
+        {
+            return w;
+        }
+    };
+
     template <typename... Components>
     struct Resolver<QueryBuilder<Components...>>
     {

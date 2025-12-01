@@ -50,9 +50,9 @@ namespace FECS::Builder
             return next;
         }
 
-        auto In(const std::string& setName) -> SystemBuilder<Args...>&
+        auto In(uint16_t setIndex) -> SystemBuilder<Args...>&
         {
-            m_SetName = setName;
+            m_SetIndex = setIndex;
             return *this;
         }
 
@@ -81,7 +81,8 @@ namespace FECS::Builder
             return *this;
         }
 
-        auto Build(std::function<void(Args...)> func) -> void
+        template <typename Fn>
+        auto Build(Fn&& func) -> void
         {
             auto task = [func](World& world)
             {
@@ -95,17 +96,18 @@ namespace FECS::Builder
         template <typename NewBuilderType>
         auto CopyStateTo(NewBuilderType& newBuilder) -> void
         {
-            newBuilder.m_SetName = m_SetName;
+            newBuilder.m_SetIndex = m_SetIndex;
             newBuilder.m_Interval = m_Interval;
             newBuilder.m_Mode = m_Mode;
         }
 
     private:
-        auto RegisterToScheduler(std::function<void(World&)> func) -> void;
+        template <typename Func>
+        auto RegisterToScheduler(Func&& func) -> void;
 
         World& m_World;
         float m_Interval = 0.0f;
-        std::string m_SetName = "Default";
+        uint16_t m_SetIndex = 0;
         Internal::SystemMode m_Mode = Internal::SystemMode::UPDATE;
 
         ScheduleManager& m_ScheduleManager;

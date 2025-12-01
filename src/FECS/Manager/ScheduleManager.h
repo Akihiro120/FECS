@@ -1,7 +1,5 @@
 #pragma once
-#include <functional>
 #include <vector>
-#include <string>
 #include "FECS/Builder/SystemBuilder.h"
 #include "FECS/Internal/SystemData.h"
 #include "FECS/World.h"
@@ -18,11 +16,34 @@ namespace FECS::Manager
         ScheduleManager(World& world)
             : m_World(world)
         {
-            m_SetExecutionOrder.push_back("Default");
+            m_SetExecutionOrder.push_back(0);
             m_FixedStep = 1.0f / 60.0f;
         }
 
-        auto SetExecutionOrder(const std::vector<std::string>& order) -> void
+        ~ScheduleManager()
+        {
+            for (auto& set : m_Sets)
+            {
+                for (auto& sys : set.startupSystem)
+                {
+                    sys.destroy(sys.object);
+                }
+                for (auto& sys : set.updateSystem)
+                {
+                    sys.destroy(sys.object);
+                }
+                for (auto& sys : set.fixedSystem)
+                {
+                    sys.destroy(sys.object);
+                }
+                for (auto& sys : set.timedSystems)
+                {
+                    sys.func.destroy(sys.func.object);
+                }
+            }
+        }
+
+        auto SetExecutionOrder(const std::vector<uint16_t>& order) -> void
         {
             m_SetExecutionOrder = order;
         }
@@ -40,13 +61,13 @@ namespace FECS::Manager
             {
                 while (m_GlobalFixedAccumulator >= m_FixedStep)
                 {
-                    for (const auto& setName : m_SetExecutionOrder)
+                    for (const auto& setIndex : m_SetExecutionOrder)
                     {
-                        if (m_Sets.find(setName) != m_Sets.end())
+                        if (m_Sets.size() < setIndex)
                         {
-                            for (auto& sys : m_Sets[setName].fixedSystem)
+                            for (auto& sys : m_Sets[setIndex].fixedSystem)
                             {
-                                sys(m_World);
+                                sys.invoke(sys.object, m_World);
                             }
                         }
                     }
@@ -54,18 +75,18 @@ namespace FECS::Manager
                 }
             }
 
-            for (const auto& setName : m_SetExecutionOrder)
+            for (const auto& setIndex : m_SetExecutionOrder)
             {
-                if (m_Sets.find(setName) == m_Sets.end())
+                if (setIndex >= m_Sets.size())
                 {
                     continue;
                 }
 
-                Internal::SystemSet& set = m_Sets[setName];
+                Internal::SystemSet& set = m_Sets[setIndex];
 
                 for (auto& sys : set.updateSystem)
                 {
-                    sys(m_World);
+                    sys.invoke(sys.object, m_World);
                 }
 
                 for (auto& sys : set.timedSystems)
@@ -73,7 +94,7 @@ namespace FECS::Manager
                     sys.accumulator += dt;
                     if (sys.accumulator >= sys.interval)
                     {
-                        sys.func(m_World);
+                        sys.func.invoke(sys.func.object, m_World);
                         sys.accumulator -= sys.interval;
                     }
                 }
@@ -82,45 +103,60 @@ namespace FECS::Manager
 
         auto RunStartup() -> void
         {
-            for (const auto& setName : m_SetExecutionOrder)
+            for (const auto& setIndex : m_SetExecutionOrder)
             {
-                if (m_Sets.find(setName) == m_Sets.end())
+                if (setIndex >= m_Sets.size())
                 {
                     continue;
                 }
 
-                Internal::SystemSet& set = m_Sets[setName];
+                Internal::SystemSet& set = m_Sets[setIndex];
 
                 for (auto& sys : set.startupSystem)
                 {
-                    sys(m_World);
+                    sys.invoke(sys.object, m_World);
                 }
 
                 set.startupSystem.clear();
             }
         }
 
+        template <typename Func>
         auto RegisterSystem(
-            std::function<void(World&)> func,
-            const std::string& setName,
+            Func&& func,
+            uint16_t setIndex,
             SystemMode mode,
             float interval = 0.0f) -> void
         {
-            SystemSet& set = m_Sets[setName];
+            if (setIndex >= m_Sets.size())
+                m_Sets.resize(setIndex + 1);
+
+            SystemSet& set = m_Sets[setIndex];
+
+            using Fn = std::decay_t<Func>;
+            Fn* stored = new Fn(std::forward<Fn>(func));
+
+            SystemEntry callable{
+                [](void* obj, World& w)
+            { (*static_cast<Fn*>(obj))(w); },
+                [](void* obj)
+            { delete static_cast<Fn*>(obj); },
+                stored,
+            };
 
             switch (mode)
             {
             case SystemMode::STARTUP:
-                set.startupSystem.push_back(std::move(func));
+                set.startupSystem.push_back(callable);
                 break;
             case SystemMode::UPDATE:
-                set.updateSystem.push_back(std::move(func));
+                set.updateSystem.push_back(callable);
                 break;
             case SystemMode::FIXED:
-                set.fixedSystem.push_back(std::move(func));
+                set.fixedSystem.push_back(callable);
                 break;
             case SystemMode::TIMED:
-                set.timedSystems.push_back({std::move(func), interval, 0.0f});
+                set.timedSystems.push_back({callable, interval, 0.0f});
                 break;
             }
         }
@@ -135,16 +171,17 @@ namespace FECS::Manager
         float m_FixedStep = 0.0f;
         float m_GlobalFixedAccumulator = 0.0f;
 
-        std::unordered_map<std::string, SystemSet> m_Sets;
-        std::vector<std::string> m_SetExecutionOrder;
+        std::vector<SystemSet> m_Sets;
+        std::vector<uint16_t> m_SetExecutionOrder;
     };
 }
 
 namespace FECS::Builder
 {
     template <typename... Args>
-    auto SystemBuilder<Args...>::RegisterToScheduler(std::function<void(World&)> func) -> void
+    template <typename Func>
+    auto SystemBuilder<Args...>::RegisterToScheduler(Func&& func) -> void
     {
-        m_ScheduleManager.RegisterSystem(std::move(func), m_SetName, m_Mode, m_Interval);
+        m_ScheduleManager.RegisterSystem(func, m_SetIndex, m_Mode, m_Interval);
     }
 }

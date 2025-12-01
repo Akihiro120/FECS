@@ -1,6 +1,5 @@
 #pragma once
 #include <vector>
-#include <functional>
 #include "FECS/World.h"
 
 namespace FECS::Internal
@@ -13,18 +12,25 @@ namespace FECS::Internal
         TIMED
     };
 
+    struct SystemEntry
+    {
+        void (*invoke)(void*, World&);
+        void (*destroy)(void*);
+        void* object;
+    };
+
     struct TimedSystem
     {
-        std::function<void(World&)> func;
+        SystemEntry func;
         float interval;
         float accumulator = 0.0f;
     };
 
     struct SystemSet
     {
-        std::vector<std::function<void(World&)>> startupSystem;
-        std::vector<std::function<void(World&)>> updateSystem;
-        std::vector<std::function<void(World&)>> fixedSystem;
+        std::vector<SystemEntry> startupSystem;
+        std::vector<SystemEntry> updateSystem;
+        std::vector<SystemEntry> fixedSystem;
         std::vector<TimedSystem> timedSystems;
     };
 }
