@@ -1,6 +1,8 @@
+#include "FECS/Internal/SystemData.h"
 #include <FECS/FECS.h>
 #include <raylib.h>
 #include <raymath.h>
+#include <iostream>
 
 using namespace FECS;
 
@@ -16,45 +18,43 @@ struct Velocity
     float y;
 };
 
-struct Time
+auto PrepareRaylib() -> void
 {
-    float deltaTime = 0.0f;
+    InitWindow(1280, 720, "Boids");
+    SetTargetFPS(60);
+}
 
-    auto GetDeltaTime() const -> float
-    {
-        return deltaTime;
-    }
-};
-
-auto TimeSystem(Time& time) -> void
+auto Render() -> void
 {
-    time.deltaTime = GetFrameTime();
+    BeginDrawing();
+    ClearBackground(BLACK);
+
+    DrawFPS(10, 10);
+
+    EndDrawing();
 }
 
 auto main() -> int
 {
-    InitWindow(1280, 720, "Boids Example");
-    SetTargetFPS(60);
-
-    World world;
-    world.Resources().Add<Time>({});
+    World world = Init();
+    world.Scheduler().SetFixedStep(1.0f / 60.0f);
+    world.Scheduler().SetExecutionOrder({"Default", "Render"});
+    world.Scheduler()
+        .AddSystem()
+        .In("Render")
+        .Startup()
+        .Build(PrepareRaylib);
 
     world.Scheduler()
         .AddSystem()
-        .Write<Time>()
-        .Build(TimeSystem);
+        .In("Render")
+        .Update()
+        .Build(Render);
 
+    world.Scheduler().RunStartup();
     while (!WindowShouldClose())
     {
-        world.Scheduler().Run();
-
-        // render
-        BeginDrawing();
-        ClearBackground(BLACK);
-
-        DrawFPS(10, 10);
-
-        EndDrawing();
+        world.Scheduler().Run(GetFrameTime());
     }
 
     CloseWindow();

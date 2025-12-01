@@ -67,7 +67,7 @@ auto main() -> int
         .WithQuery<Position, Velocity>()
         .Build(MovementSystem);
 
-    world.Scheduler().Run();
+    world.Scheduler().Run(1.0f);
 
     return 0;
 }
