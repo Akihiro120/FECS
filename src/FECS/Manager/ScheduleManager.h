@@ -63,7 +63,7 @@ namespace FECS::Manager
                 {
                     for (const auto& setIndex : m_SetExecutionOrder)
                     {
-                        if (m_Sets.size() < setIndex)
+                        if (setIndex < m_Sets.size())
                         {
                             for (auto& sys : m_Sets[setIndex].fixedSystem)
                             {
@@ -92,7 +92,7 @@ namespace FECS::Manager
                 for (auto& sys : set.timedSystems)
                 {
                     sys.accumulator += dt;
-                    if (sys.accumulator >= sys.interval)
+                    while (sys.accumulator >= sys.interval)
                     {
                         sys.func.invoke(sys.func.object, m_World);
                         sys.accumulator -= sys.interval;
@@ -115,6 +115,7 @@ namespace FECS::Manager
                 for (auto& sys : set.startupSystem)
                 {
                     sys.invoke(sys.object, m_World);
+                    sys.destroy(sys.object);
                 }
 
                 set.startupSystem.clear();
