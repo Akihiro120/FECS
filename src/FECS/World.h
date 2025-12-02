@@ -10,9 +10,11 @@ namespace FECS
     namespace Manager
     {
         class ScheduleManager;
+        class EntityManager;
+        class ComponentManager;
+        class ResourceManager;
+        class ViewManager;
     }
-
-    using namespace Manager;
 
     class World
     {
@@ -20,18 +22,18 @@ namespace FECS
         World();
         ~World();
 
-        auto Entities() -> EntityManager&;
-        auto Components() -> ComponentManager&;
-        auto View() -> ViewManager&;
-        auto Resources() -> ResourceManager&;
-        auto Scheduler() -> ScheduleManager&;
+        auto Entities() -> Manager::EntityManager&;
+        auto Components() -> Manager::ComponentManager&;
+        auto View() -> Manager::ViewManager&;
+        auto Resources() -> Manager::ResourceManager&;
+        auto Scheduler() -> Manager::ScheduleManager&;
 
     private:
         // managers
-        std::unique_ptr<EntityManager> p_EntityManager;
-        std::unique_ptr<ComponentManager> p_ComponentManager;
-        std::unique_ptr<ResourceManager> p_ResourceManager;
-        std::unique_ptr<ScheduleManager> p_ScheduleManager;
-        std::unique_ptr<ViewManager> p_ViewManager;
+        std::unique_ptr<Manager::EntityManager> p_EntityManager;
+        std::unique_ptr<Manager::ComponentManager> p_ComponentManager;
+        std::unique_ptr<Manager::ResourceManager> p_ResourceManager;
+        std::unique_ptr<Manager::ScheduleManager> p_ScheduleManager;
+        std::unique_ptr<Manager::ViewManager> p_ViewManager;
     };
 }

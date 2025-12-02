@@ -6,12 +6,10 @@
 
 namespace FECS::Builder
 {
-    using namespace Manager;
-
     class EntityBuilder
     {
     public:
-        EntityBuilder(Entity entity, std::unique_ptr<ComponentManager>& manager)
+        EntityBuilder(Entity entity, std::unique_ptr<Manager::ComponentManager>& manager)
             : p_ComponentManager(manager)
         {
             m_ModifiedEntity = entity;
@@ -94,6 +92,6 @@ namespace FECS::Builder
 
     private:
         Entity m_ModifiedEntity = INVALID_ENTITY;
-        std::unique_ptr<ComponentManager>& p_ComponentManager;
+        std::unique_ptr<Manager::ComponentManager>& p_ComponentManager;
     };
 }

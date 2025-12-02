@@ -7,8 +7,6 @@
 
 namespace FECS::Builder
 {
-    using namespace Manager;
-
     template <typename... Components>
     class QueryBuilder
     {
@@ -20,7 +18,7 @@ namespace FECS::Builder
         };
 
     public:
-        QueryBuilder(ComponentManager* manager)
+        QueryBuilder(Manager::ComponentManager* manager)
             : p_ComponentManager(manager),
               m_Pools(std::make_tuple(manager->GetStorages().template GetPool<Components>()...))
         {
@@ -32,8 +30,8 @@ namespace FECS::Builder
         {
             std::array<PoolInfo, sizeof...(Components)> info = {
                 PoolInfo{
-                    std::get<SparseSet<Components>*>(m_Pools)->Size(),
-                    &std::get<SparseSet<Components>*>(m_Pools)->GetEntities()}...};
+                    std::get<Container::SparseSet<Components>*>(m_Pools)->Size(),
+                    &std::get<Container::SparseSet<Components>*>(m_Pools)->GetEntities()}...};
 
             const PoolInfo* smallest = &info[0];
             for (const auto& item : info)
@@ -46,17 +44,17 @@ namespace FECS::Builder
 
             for (Entity e : *smallest->entities)
             {
-                if ((std::get<SparseSet<Components>*>(m_Pools)->Has(e) && ...))
+                if ((std::get<Container::SparseSet<Components>*>(m_Pools)->Has(e) && ...))
                 {
-                    queryFunction(e, std::get<SparseSet<Components>*>(m_Pools)->Get(e)...);
+                    queryFunction(e, std::get<Container::SparseSet<Components>*>(m_Pools)->Get(e)...);
                 }
             }
         }
 
     private:
-        using PoolTuple = std::tuple<SparseSet<Components>*...>;
+        using PoolTuple = std::tuple<Container::SparseSet<Components>*...>;
 
         PoolTuple m_Pools;
-        ComponentManager* p_ComponentManager;
+        Manager::ComponentManager* p_ComponentManager;
     };
 }

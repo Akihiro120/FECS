@@ -20,7 +20,7 @@ namespace FECS::Builder
         friend class SystemBuilder;
 
     public:
-        SystemBuilder(World& world, ScheduleManager& manager)
+        SystemBuilder(World& world, Manager::ScheduleManager& manager)
             : m_World(world),
               m_ScheduleManager(manager)
         {
@@ -110,6 +110,6 @@ namespace FECS::Builder
         uint16_t m_SetIndex = 0;
         Internal::SystemMode m_Mode = Internal::SystemMode::UPDATE;
 
-        ScheduleManager& m_ScheduleManager;
+        Manager::ScheduleManager& m_ScheduleManager;
     };
 }

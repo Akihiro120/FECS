@@ -9,36 +9,36 @@ namespace FECS
 {
     World::World()
     {
-        p_ComponentManager = std::make_unique<ComponentManager>();
-        p_EntityManager = std::make_unique<EntityManager>(p_ComponentManager);
-        p_ResourceManager = std::make_unique<ResourceManager>();
-        p_ScheduleManager = std::make_unique<ScheduleManager>(*this);
-        p_ViewManager = std::make_unique<ViewManager>(p_ComponentManager);
+        p_ComponentManager = std::make_unique<Manager::ComponentManager>();
+        p_EntityManager = std::make_unique<Manager::EntityManager>(p_ComponentManager);
+        p_ResourceManager = std::make_unique<Manager::ResourceManager>();
+        p_ScheduleManager = std::make_unique<Manager::ScheduleManager>(*this);
+        p_ViewManager = std::make_unique<Manager::ViewManager>(p_ComponentManager);
     }
 
     World::~World() = default;
 
-    auto World::Scheduler() -> ScheduleManager&
+    auto World::Scheduler() -> Manager::ScheduleManager&
     {
         return *p_ScheduleManager;
     }
 
-    auto World::Entities() -> EntityManager&
+    auto World::Entities() -> Manager::EntityManager&
     {
         return *p_EntityManager;
     }
 
-    auto World::Components() -> ComponentManager&
+    auto World::Components() -> Manager::ComponentManager&
     {
         return *p_ComponentManager;
     }
 
-    auto World::View() -> ViewManager&
+    auto World::View() -> Manager::ViewManager&
     {
         return *p_ViewManager;
     }
 
-    auto World::Resources() -> ResourceManager&
+    auto World::Resources() -> Manager::ResourceManager&
     {
         return *p_ResourceManager;
     }

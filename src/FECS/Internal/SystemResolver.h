@@ -43,9 +43,9 @@ namespace FECS::Internal
     };
 
     template <typename... Components>
-    struct Resolver<QueryBuilder<Components...>>
+    struct Resolver<Builder::QueryBuilder<Components...>>
     {
-        static auto Get(World& w) -> QueryBuilder<Components...>
+        static auto Get(World& w) -> Builder::QueryBuilder<Components...>
         {
             return w.View().Query<Components...>();
         }

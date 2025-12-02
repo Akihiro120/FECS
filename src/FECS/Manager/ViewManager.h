@@ -4,8 +4,6 @@
 
 namespace FECS::Manager
 {
-    using namespace Builder;
-
     class ViewManager
     {
     public:
@@ -17,9 +15,9 @@ namespace FECS::Manager
         ~ViewManager() = default;
 
         template <typename... Components>
-        auto Query() -> QueryBuilder<Components...>
+        auto Query() -> Builder::QueryBuilder<Components...>
         {
-            return QueryBuilder<Components...>(p_ComponentManager);
+            return Builder::QueryBuilder<Components...>(p_ComponentManager);
         }
 
     private:
