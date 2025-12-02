@@ -2,7 +2,11 @@ project(boids)
 add_executable(${PROJECT_NAME} main.cpp)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE FECS)
-
+if(MSVC)
+    target_compile_options(FECS PRIVATE /O2 /Ot)
+else()
+    target_compile_options(FECS PRIVATE -O3 -march=native -ffast-math)
+endif()
 set(RAYLIB_VERSION 5.5)
 find_package(raylib ${RAYLIB_VERSION} QUIET) # QUIET or REQUIRED
 if (NOT raylib_FOUND) # If there's none, fetch and build raylib
