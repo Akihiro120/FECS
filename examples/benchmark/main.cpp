@@ -25,7 +25,7 @@ struct ComponentFour
 };
 
 #define NUM_ENTITIES 100
-using namespace FECS;
+
 
 // Operation	100 Entities (ms)	10,000 Entities (ms)	1,000,000 Entities (ms)
 // Create Entity	0.0021	0.0604	3.4217
@@ -38,7 +38,7 @@ using namespace FECS;
 // Query 4 Components	0.0015	0.0348	3.1150
 // Get 4 Components	0.0005	0.0497	4.9651
 
-auto Benchmark_CreateEntity(World& world, std::vector<Entity>& ids) -> void
+auto Benchmark_CreateEntity(FECS::World& world, std::vector<FECS::Entity>& ids) -> void
 {
     Benchmark bm("Create Entity");
     for (int i = 0; i < NUM_ENTITIES; i++)
@@ -49,7 +49,7 @@ auto Benchmark_CreateEntity(World& world, std::vector<Entity>& ids) -> void
     }
 }
 
-auto Benchmark_AddComponent(World& world, const std::vector<Entity>& ids) -> void
+auto Benchmark_AddComponent(FECS::World& world, const std::vector<FECS::Entity>& ids) -> void
 {
     Benchmark bm("Add Component");
     for (int i = 0; i < NUM_ENTITIES; i++)
@@ -58,7 +58,7 @@ auto Benchmark_AddComponent(World& world, const std::vector<Entity>& ids) -> voi
     }
 }
 
-auto Benchmark_GetComponent(World& world, const std::vector<Entity>& ids) -> void
+auto Benchmark_GetComponent(FECS::World& world, const std::vector<FECS::Entity>& ids) -> void
 {
     Benchmark bm("Get Component");
     for (int i = 0; i < NUM_ENTITIES; i++)
@@ -67,7 +67,7 @@ auto Benchmark_GetComponent(World& world, const std::vector<Entity>& ids) -> voi
     }
 }
 
-auto Benchmark_RemoveComponent(World& world, const std::vector<Entity>& ids) -> void
+auto Benchmark_RemoveComponent(FECS::World& world, const std::vector<FECS::Entity>& ids) -> void
 {
     Benchmark bm("Remove Component");
     for (int i = 0; i < NUM_ENTITIES; i++)
@@ -76,7 +76,7 @@ auto Benchmark_RemoveComponent(World& world, const std::vector<Entity>& ids) -> 
     }
 }
 
-auto Benchmark_DeleteEntity(World& world, const std::vector<Entity>& ids) -> void
+auto Benchmark_DeleteEntity(FECS::World& world, const std::vector<FECS::Entity>& ids) -> void
 {
     Benchmark bm("Delete Entity");
     for (int i = 0; i < NUM_ENTITIES; i++)
@@ -85,12 +85,12 @@ auto Benchmark_DeleteEntity(World& world, const std::vector<Entity>& ids) -> voi
     }
 }
 
-auto Benchmark_QueryTwoComponents(World& world) -> void
+auto Benchmark_QueryTwoComponents(FECS::World& world) -> void
 {
     Benchmark bm("Query 2 components");
     world.View()
         .Query<ComponentOne, ComponentTwo>()
-        .Each([](Entity id,
+        .Each([](FECS::Entity id,
                  ComponentOne& one,
                  ComponentTwo& two)
     {
@@ -99,7 +99,7 @@ auto Benchmark_QueryTwoComponents(World& world) -> void
     });
 }
 
-auto Benchmark_GetTwoComponents(World& world, std::vector<Entity>& ids) -> void
+auto Benchmark_GetTwoComponents(FECS::World& world, std::vector<FECS::Entity>& ids) -> void
 {
     Benchmark bm("Get 2 components");
     for (int i = 0; i < NUM_ENTITIES; i++)
@@ -109,12 +109,12 @@ auto Benchmark_GetTwoComponents(World& world, std::vector<Entity>& ids) -> void
     }
 }
 
-auto Benchmark_QueryFourComponents(World& world) -> void
+auto Benchmark_QueryFourComponents(FECS::World& world) -> void
 {
     Benchmark bm("Query 4 components");
     world.View()
         .Query<ComponentOne, ComponentTwo, ComponentThree, ComponentFour>()
-        .Each([](Entity id,
+        .Each([](FECS::Entity id,
                  ComponentOne& one,
                  ComponentTwo& two,
                  ComponentThree& three,
@@ -131,7 +131,7 @@ auto Benchmark_QueryFourComponents(World& world) -> void
 // 100 Entities
 // 10,000 Entities
 // 1,000,000 Entities
-auto Benchmark_GetFourComponents(World& world, std::vector<Entity>& ids) -> void
+auto Benchmark_GetFourComponents(FECS::World& world, std::vector<FECS::Entity>& ids) -> void
 {
     Benchmark bm("Get 4 components");
     for (int i = 0; i < NUM_ENTITIES; i++)
@@ -146,10 +146,10 @@ auto Benchmark_GetFourComponents(World& world, std::vector<Entity>& ids) -> void
 int main()
 {
     std::cout << "Running with " << NUM_ENTITIES << " entities" << std::endl;
-    std::vector<Entity> entities;
+    std::vector<FECS::Entity> entities;
     entities.resize(NUM_ENTITIES);
 
-    World world;
+    FECS::World world;
 
     Benchmark_CreateEntity(world, entities);
     Benchmark_AddComponent(world, entities);
