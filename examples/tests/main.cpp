@@ -1,5 +1,6 @@
 #include <iostream>
 #include <FECS/FECS.h>
+#include <FECS/Builder/EntityBuilder.h>
 
 struct Position
 {

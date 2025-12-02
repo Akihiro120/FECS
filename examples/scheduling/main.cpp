@@ -1,7 +1,8 @@
 #include <FECS/FECS.h>
+#include <FECS/Builder/QueryBuilder.h>
 #include <iostream>
 
-using namespace FECS;
+
 
 struct Position
 {
@@ -35,16 +36,16 @@ struct Time
     }
 };
 
-auto MovementSystem(const Time& time, QueryBuilder<Position, Velocity> query) -> void
+auto MovementSystem(const Time& time, FECS::Builder::QueryBuilder<Position, Velocity> query) -> void
 {
-    query.Each([&](Entity id, Position& pos, Velocity& vel)
+    query.Each([&](FECS::Entity id, Position& pos, Velocity& vel)
     {
         std::cout << pos << std::endl;
         pos.x += vel.x * time.deltaTime();
         pos.y += vel.y * time.deltaTime();
     });
 
-    query.Each([&](Entity id, Position& pos, Velocity& vel)
+    query.Each([&](FECS::Entity id, Position& pos, Velocity& vel)
     {
         std::cout << pos << std::endl;
     });
@@ -52,7 +53,7 @@ auto MovementSystem(const Time& time, QueryBuilder<Position, Velocity> query) ->
 
 auto main() -> int
 {
-    World world;
+    FECS::World world;
     world.Entities()
         .Create()
         .Attach<Position>({6.0f, 6.0f})
