@@ -12,9 +12,9 @@ static auto PrepareRaylib() -> void
 }
 
 static Vector2 s_TrianglePoints[3] = {
-    {12, 0},
-    {-6, -5},
-    {-6, 5}};
+    {3, 0},
+    {-1.5f, -1.25f},
+    {-1.5f, 1.25f}};
 
 static Vector2 RotatePoint(Vector2 point, Vector2 pos, float angle)
 {

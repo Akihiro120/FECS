@@ -1,6 +1,7 @@
 #include <FECS/FECS.h>
 #include "Boids.h"
 #include "Rendering.h"
+#include "Grid.h"
 
 enum SystemGroupID
 {
@@ -12,6 +13,8 @@ enum SystemGroupID
 auto main() -> int
 {
     FECS::World world;
+    world.Resources().Add<SpatialGrid>({});
+
     world.Scheduler().SetFixedStep(1.0f / 60.0f);
     world.Scheduler().SetExecutionOrder(
         {
@@ -44,6 +47,8 @@ auto main() -> int
         .AddSystem()
         .In(SystemGroupID::PHYSICS)
         .Fixed()
+        .Write<SpatialGrid>()
+        .Write<FECS::World>()
         .WithQuery<PositionComponent, VelocityComponent>()
         .Build(ResolveForces);
 
@@ -60,6 +65,14 @@ auto main() -> int
         .Fixed()
         .WithQuery<PositionComponent, VelocityComponent>()
         .Build(ResolveWallCollision);
+
+    world.Scheduler()
+        .AddSystem()
+        .In(SystemGroupID::PHYSICS)
+        .Fixed()
+        .Write<SpatialGrid>()
+        .WithQuery<PositionComponent>()
+        .Build(SpatialGridSystem);
 
     world.Scheduler().RunStartup();
     while (!WindowShouldClose())
