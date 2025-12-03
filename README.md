@@ -304,6 +304,24 @@ world.Scheduler()
 ```
 
 ---
+## Performance Benchmarks
+Benchmarking was performed under normal conditions where component storages are packed.
+
+**Hardware:** Ryzen 5600G 3.9GHz 6 Cores
+
+| Operation            | 100 Entities (ms) | 10,000 Entities (ms) | 1,000,000 Entities (ms) |
+| :------------------- | :---------------- | :------------------- | :---------------------- |
+| Create Entity        | 0.0021            | 0.0604               | 3.4217                  |
+| Add Component        | 0.0145            | 0.1238               | 7.8212                  |
+| Get Component        | 0.0003            | 0.0136               | 1.3510                  |
+| Remove Component     | 0.0033            | 0.0549               | 5.9727                  |
+| Delete Entity        | 0.0131            | 0.0676               | 5.9905                  |
+| Query 2 Components   | 0.0003            | 0.0244               | 2.6986                  |
+| Get 2 Components     | 0.0004            | 0.0249               | 2.4843                  |
+| Query 4 Components   | 0.0015            | 0.0348               | 3.1150                  |
+| Get 4 Components     | 0.0005            | 0.0497               | 4.9651                  |
+
+---
 ## Examples
 The project includes several examples in the `examples` directory:
 - **boids**: A classic boids simulation, demonstrating advanced features like system ordering and spatial hashing.
