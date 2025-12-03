@@ -66,14 +66,17 @@ struct Position { float x, y; };
 struct Velocity { float dx, dy; };
 
 // A system that moves entities
-void MoveSystem(FECS::Query<Position, Velocity> query) {
-    query.Each([](Position& pos, Velocity& vel) {
+void MoveSystem(FECS::Query<Position, Velocity> query)
+{
+    query.Each([](Position& pos, Velocity& vel)
+    {
         pos.x += vel.dx;
         pos.y += vel.dy;
     });
 }
 
-int main() {
+int main()
+{
     // Create a world
     FECS::World world;
 
@@ -93,7 +96,8 @@ int main() {
     world.Scheduler().Run(0.016f); // Pass delta time
 
     // You can also query manually
-    world.View().Query<Position>().Each([](FECS::Entity id, Position& pos){
+    world.View().Query<Position>().Each([](FECS::Entity id, Position& pos)
+    {
         std::cout << "Entity " << id << " Position: " << pos.x << ", " << pos.y << std::endl;
     });
 
@@ -141,17 +145,20 @@ world.Entities().Create()
     // Add a tag (a component with no data)
     .Tag<Player>()
     // Conditionally attach components
-    .When(isGodMode, [](FECS::EntityBuilder& builder) {
+    .When(isGodMode, [](FECS::EntityBuilder& builder)
+    {
         builder.Attach(Invincibility{});
     })
     // Ensure a component exists, adding a default if it doesn't
     .Ensure(Health{100})
     // Modify an existing component
-    .Patch<Position>([](Position& pos) {
+    .Patch<Position>([](Position& pos)
+    {
         pos.x = 10.0f;
     })
     // Apply a custom function to the builder
-    .Apply([](FECS::EntityBuilder& builder){
+    .Apply([](FECS::EntityBuilder& builder)
+    {
         // ... custom logic ...
     })
     // Detach a component
@@ -170,7 +177,8 @@ FECS::Entity entity = world.Entities().Create().Build();
 componentManager.Attach<Position>(entity, {0.0f, 0.0f});
 
 // Check if an entity has a component
-if (componentManager.Has<Position>(entity)) {
+if (componentManager.Has<Position>(entity))
+{
     // Get a component
     Position& pos = componentManager.Get<Position>(entity);
 }
@@ -187,8 +195,10 @@ The `SystemBuilder` provides a fluent API for defining systems:
 
 ```cpp
 // A system that prints the position of entities
-void PrintSystem(FECS::Query<Position> query) {
-    query.Each([](Position& pos) {
+void PrintSystem(FECS::Query<Position> query)
+{
+    query.Each([](Position& pos)
+    {
         std::cout << "Position: " << pos.x << ", " << pos.y << std::endl;
     });
 }
@@ -205,7 +215,8 @@ Systems can depend on resources. Use `Read<T>` for read-only access and `Write<T
 ```cpp
 struct GameTime { float totalTime; };
 
-void TimeSystem(GameTime& time) {
+void TimeSystem(GameTime& time)
+{
     time.totalTime += 0.016f;
 }
 
@@ -257,7 +268,8 @@ The `ViewManager` (`world.View()`) is the entry point for querying entities.
 auto query = world.View().Query<Position, Velocity>();
 
 // Iterate over the entities
-query.Each([](FECS::Entity id, Position& pos, Velocity& vel) {
+query.Each([](FECS::Entity id, Position& pos, Velocity& vel)
+{
     // ... logic ...
 });
 ```
@@ -267,7 +279,7 @@ The `ResourceManager` (`world.Resources()`) allows you to store and access globa
 
 ```cpp
 // Define a resource
-struct GameState { bool isRunning = true; };
+struct GameState { float isRunning = true; };
 
 // Add the resource to the world
 world.Resources().Add(GameState{});
@@ -277,8 +289,10 @@ GameState& state = world.Resources().Get<GameState>();
 state.isRunning = false;
 
 // Access the resource in a system
-void ControlSystem(GameState& state) {
-    if (/* some condition */) {
+void ControlSystem(GameState& state)
+{
+    if (/* some condition */)
+    {
         state.isRunning = false;
     }
 }
