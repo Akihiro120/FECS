@@ -52,6 +52,19 @@ cd build
 cmake ..
 cmake --build .
 ```
+or, Using `FetchContent` via CMake
+```cmake
+include(FetchContent)
+
+FetchContent_Declare(
+    FECS
+    GIT_REPOSITORY https://github.com/Akihiro120/FECS
+    GIT_TAG        main
+)
+
+FetchContent_MakeAvailable(FECS)
+target_link_libraries(${PROJECT_NAME} PRIVATE FECS)
+```
 
 ---
 ## Quick Start
