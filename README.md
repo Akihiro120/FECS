@@ -16,8 +16,9 @@
 - [Core Concepts](#core-concepts)
   - [The World](#the-world)
   - [Entities](#entities)
+  - [Components](#components)
   - [Systems & Scheduling](#systems--scheduling)
-  - [Queries](#queries)
+  - [Views & Queries](#views--queries)
   - [Resources](#resources)
 - [Examples](#examples)
 - [License](#license)
@@ -30,7 +31,7 @@ FECS is built on a modular, manager-based architecture that promotes clean, deco
 ## Features
 - **Modern C++20 Design**: Utilizes modern C++ features for a clean and efficient implementation.
 - **Manager-Based Architecture**: Decoupled managers for Entities, Components, Systems, and more.
-- **Fluent System Builder API**: Expressive and type-safe API for defining systems and their scheduling.
+- **Fluent Builder APIs**: Expressive and type-safe APIs for creating entities and defining systems.
 - **Powerful System Scheduling**: Organize systems into ordered sets with support for `Startup`, `Update`, `Fixed`, and `Timed` execution.
 - **Data-Oriented**: High-performance component storage using sparse sets.
 - **Resource Management**: A dedicated manager for global, non-entity data.
@@ -65,8 +66,8 @@ struct Position { float x, y; };
 struct Velocity { float dx, dy; };
 
 // A system that moves entities
-void MoveSystem(FECS::Query<Position&, const Velocity&> query) {
-    query.Each([](Position& pos, const Velocity& vel) {
+void MoveSystem(FECS::Query<Position, Velocity> query) {
+    query.Each([](Position& pos, Velocity& vel) {
         pos.x += vel.dx;
         pos.y += vel.dy;
     });
@@ -79,21 +80,21 @@ int main() {
     // Create an entity with Position and Velocity components
     world.Entities().Create()
         .Attach<Position>({ 0.0f, 0.0f })
-        .Attach<Velocity>({ 1.0f, 0.5f });
+        .Attach<Velocity>({ 1.0f, 0.5f })
+        .Build();
 
     // Add a system to update the position
-    world.Scheduler().AddSystem()
-        .Update()
+    world.Scheduler()
+        .AddSystem()
+        .WithQuery<Position, Velocity>()
         .Build(MoveSystem);
 
     // Run the scheduler for one frame
-    world.Scheduler().RunStartup();
     world.Scheduler().Run(0.016f); // Pass delta time
 
     // You can also query manually
-    auto query = world.Query<const Position&>();
-    query.Each([](const Position& pos){
-        std::cout << "Position: " << pos.x << ", " << pos.y << std::endl;
+    world.View().Query<Position>().Each([](FECS::Entity id, Position& pos){
+        std::cout << "Entity " << id << " Position: " << pos.x << ", " << pos.y << std::endl;
     });
 
     return 0;
@@ -104,76 +105,165 @@ int main() {
 ## Core Concepts
 
 ### The World
-The `FECS::World` class is the heart of the ECS. It acts as a central hub, providing access to all the underlying managers for entities, components, resources, and scheduling.
+The `FECS::World` class is the heart of the ECS. It acts as a central hub, providing access to all the underlying managers:
+
+```cpp
+FECS::World world;
+
+auto& entityManager = world.Entities();
+auto& componentManager = world.Components();
+auto& resourceManager = world.Resources();
+auto& scheduleManager = world.Scheduler();
+auto& viewManager = world.View();
+```
 
 ### Entities
-You can create entities using the `EntityManager`, accessed via `world.Entities()`.
+You can create entities using the `EntityManager`, accessed via `world.Entities()`. The `EntityBuilder` provides a fluent API for composing entities.
 
+#### Creating Entities
 ```cpp
 // Create a new entity and attach components
 world.Entities().Create()
     .Attach<Position>({ 0.0f, 0.0f })
-    .Attach<Velocity>({ 1.0f, 1.0f });
+    .Attach<Velocity>({ 1.0f, 1.0f })
+    .Build();
+```
+
+#### Advanced Entity Composition
+The `EntityBuilder` supports a variety of methods for more complex entity creation:
+
+```cpp
+struct Player {};
+
+world.Entities().Create()
+    // Emplace a component in-place
+    .Emplace<Position>(0.0f, 0.0f)
+    // Add a tag (a component with no data)
+    .Tag<Player>()
+    // Conditionally attach components
+    .When(isGodMode, [](FECS::EntityBuilder& builder) {
+        builder.Attach(Invincibility{});
+    })
+    // Ensure a component exists, adding a default if it doesn't
+    .Ensure(Health{100})
+    // Modify an existing component
+    .Patch<Position>([](Position& pos) {
+        pos.x = 10.0f;
+    })
+    // Apply a custom function to the builder
+    .Apply([](FECS::EntityBuilder& builder){
+        // ... custom logic ...
+    })
+    // Detach a component
+    .Detach<UselessComponent>()
+    .Build();
+```
+
+### Components
+While the `EntityBuilder` is the primary way to work with components, you can also use the `ComponentManager` directly:
+
+```cpp
+auto& componentManager = world.Components();
+FECS::Entity entity = world.Entities().Create().Build();
+
+// Attach a component
+componentManager.Attach<Position>(entity, {0.0f, 0.0f});
+
+// Check if an entity has a component
+if (componentManager.Has<Position>(entity)) {
+    // Get a component
+    Position& pos = componentManager.Get<Position>(entity);
+}
+
+// Detach a component
+componentManager.Detach<Position>(entity);
 ```
 
 ### Systems & Scheduling
-Systems contain the logic of your application. The `ScheduleManager` (`world.Scheduler()`) is used to define systems, their execution type, and their order.
+Systems contain the logic of your application. The `ScheduleManager` (`world.Scheduler()`) is used to define systems and their execution properties.
+
+#### System Creation
+The `SystemBuilder` provides a fluent API for defining systems:
 
 ```cpp
-// A system function
-void MySystem(FECS::Query<MyComponent&> query) {
-    // ... logic ...
+// A system that prints the position of entities
+void PrintSystem(FECS::Query<Position> query) {
+    query.Each([](Position& pos) {
+        std::cout << "Position: " << pos.x << ", " << pos.y << std::endl;
+    });
 }
 
-// Add the system to the scheduler
-world.Scheduler().AddSystem()
-    .Update() // Or .Startup(), .Fixed(), .Timed()
-    .Build(MySystem);
+world.Scheduler()
+    .AddSystem()
+    .WithQuery<Position>()
+    .Build(PrintSystem);
 ```
-Systems are built using a fluent `SystemBuilder` API. You can specify dependencies on resources and other parts of the world.
+
+#### System Dependencies
+Systems can depend on resources. Use `Read<T>` for read-only access and `Write<T>` for read-write access.
 
 ```cpp
-// A system that needs access to a global resource
-void MySystemWithResource(MyResource& resource, FECS::Query<MyComponent&> query) {
-    // ... logic ...
+struct GameTime { float totalTime; };
+
+void TimeSystem(GameTime& time) {
+    time.totalTime += 0.016f;
 }
 
-world.Scheduler().AddSystem()
-    .Update()
-    .Write<MyResource>() // Request write access to the resource
-    .Build(MySystemWithResource);
-
+world.Scheduler()
+    .AddSystem()
+    .Write<GameTime>()
+    .Build(TimeSystem);
 ```
 
-### Queries
-Queries are the primary way to access and iterate over entities with a specific set of components. You can create queries manually or have them passed to your systems.
+#### System Execution
+You can control when a system runs:
 
-**1. Manual Queries:**
-Use `world.Query<...>()` to get a query object that you can iterate over.
+- **`Startup()`**: Runs once before the main loop.
+- **`Update()`**: Runs every frame.
+- **`Fixed()`**: Runs at a fixed time step.
+- **`Timed(interval)`**: Runs at a specific interval.
 
 ```cpp
-auto query = world.Query<Position&, const Velocity&>();
-query.Each([](Position& pos, const Velocity& vel) {
+world.Scheduler().SetFixedStep(1.0f / 60.0f);
+
+world.Scheduler().AddSystem().Startup().Build(InitGame);
+world.Scheduler().AddSystem().Update().Build(HandleInput);
+world.Scheduler().AddSystem().Fixed().Build(PhysicsUpdate);
+world.Scheduler().AddSystem().Timed(1.0f).Build(SlowUpdate);
+```
+
+#### System Ordering
+Systems can be organized into groups to control the execution order.
+
+```cpp
+enum SystemGroupID { INPUT = 0, PHYSICS = 1, RENDER = 2 };
+
+world.Scheduler().SetExecutionOrder({
+    SystemGroupID::INPUT,
+    SystemGroupID::PHYSICS,
+    SystemGroupID::RENDER,
+});
+
+world.Scheduler().AddSystem()
+    .In(SystemGroupID::RENDER)
+    .Build(RenderSystem);
+```
+
+### Views & Queries
+The `ViewManager` (`world.View()`) is the entry point for querying entities.
+
+```cpp
+// Get a query for all entities with Position and Velocity
+auto query = world.View().Query<Position, Velocity>();
+
+// Iterate over the entities
+query.Each([](FECS::Entity id, Position& pos, Velocity& vel) {
     // ... logic ...
 });
 ```
 
-**2. System Queries:**
-When building a system, you can specify a query that will be automatically passed as an argument to your system function.
-
-```cpp
-void MySystem(FECS::Query<Position&> query) {
-    query.Each([](Position& pos) { /* ... */ });
-}
-
-world.Scheduler().AddSystem()
-    .Update()
-    // No .WithQuery<>() is needed, it's inferred from the function signature!
-    .Build(MySystem);
-```
-
 ### Resources
-The `ResourceManager` (`world.Resources()`) allows you to store and access global, non-entity data in a type-safe manner.
+The `ResourceManager` (`world.Resources()`) allows you to store and access global, non-entity data.
 
 ```cpp
 // Define a resource
@@ -182,6 +272,10 @@ struct GameState { bool isRunning = true; };
 // Add the resource to the world
 world.Resources().Add(GameState{});
 
+// Access the resource directly
+GameState& state = world.Resources().Get<GameState>();
+state.isRunning = false;
+
 // Access the resource in a system
 void ControlSystem(GameState& state) {
     if (/* some condition */) {
@@ -189,12 +283,19 @@ void ControlSystem(GameState& state) {
     }
 }
 
-world.Scheduler().AddSystem().Update().Build(ControlSystem);
+world.Scheduler()
+    .AddSystem()
+    .Write<GameState>()
+    .Build(ControlSystem);
 ```
 
 ---
 ## Examples
-The project includes several examples in the `examples` directory. The `boids` example is a great starting point for understanding how to use FECS in a real-world application, demonstrating advanced features like system ordering and spatial hashing.
+The project includes several examples in the `examples` directory:
+- **boids**: A classic boids simulation, demonstrating advanced features like system ordering and spatial hashing.
+- **scheduling**: A simple example showcasing the system scheduler.
+- **benchmark**: A set of benchmarks for various ECS operations.
+- **tests**: A collection of tests for various features, and a good place to see the `EntityBuilder` in action.
 
 ---
 ## License
