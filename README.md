@@ -3,7 +3,7 @@
 [![Test](https://github.com/Akihiro120/FECS/actions/workflows/test.yml/badge.svg)](https://github.com/Akihiro120/FECS/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-> A modern, manager-based, and data-oriented C++20 Entity Component System (ECS) framework designed for performance and ease of use in real-time applications.
+> A modern, manager-based, and data-oriented C++17 Entity Component System (ECS) framework designed for performance and ease of use in real-time applications.
 
 ---
 ## Table of Contents
