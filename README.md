@@ -1,104 +1,201 @@
-# FECS - A Functional Entity Component System
+# FECS - A Fast Entity Component System
 
 [![Test](https://github.com/Akihiro120/FECS/actions/workflows/test.yml/badge.svg)](https://github.com/Akihiro120/FECS/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-> A functional and lightweight C++ ECS framework.
-> Optimized to *"consume 100% of your memory"* and usage in real-time games.
+> A modern, manager-based, and data-oriented C++20 Entity Component System (ECS) framework designed for performance and ease of use in real-time applications.
 
 ---
 ## Table of Contents
 - [Why FECS?](#why-fecs)
 - [Features](#features)
-- [Installation](#installation)
-- [Prerequisites](#prerequisites)
+- [Getting Started](#getting-started)
+  - [Prerequisites](#prerequisites)
+  - [Building](#building)
 - [Quick Start](#quick-start)
-- [API Reference](#api-reference)
+- [Core Concepts](#core-concepts)
+  - [The World](#the-world)
+  - [Entities](#entities)
+  - [Systems & Scheduling](#systems--scheduling)
+  - [Queries](#queries)
+  - [Resources](#resources)
+- [Examples](#examples)
 - [License](#license)
 
 ---
 ## Why FECS
-Most ECS libraries trade off binary size for convenience.  
-**FECS** flips that trade-off: by packing data densely and avoiding hidden allocations, it delivers **raw speed** at the cost of larger binaries—perfect when you need unlimited entities and components in a real-time engine.
+FECS is built on a modular, manager-based architecture that promotes clean, decoupled code. It leverages modern C++20 features and a fluent builder API to provide an expressive and type-safe way to build systems. The design prioritizes data-oriented principles for high performance in demanding applications like games and simulations, while remaining flexible and easy to extend.
 
 ---
 ## Features
-- **Header-Only**: Drop all files into your include path.
-- **Zero Hidden Allocations**: Every component pool is pre-allocated and determined at compile time.
-- **Unlimited Entities and Components**: Indexed by 32-bit IDs + versioning.
-- **Control**: Full control over what gets allocated, and how much.
-- **Memory Efficiency**: Densely packed data + effective caching.
+- **Modern C++20 Design**: Utilizes modern C++ features for a clean and efficient implementation.
+- **Manager-Based Architecture**: Decoupled managers for Entities, Components, Systems, and more.
+- **Fluent System Builder API**: Expressive and type-safe API for defining systems and their scheduling.
+- **Powerful System Scheduling**: Organize systems into ordered sets with support for `Startup`, `Update`, `Fixed`, and `Timed` execution.
+- **Data-Oriented**: High-performance component storage using sparse sets.
+- **Resource Management**: A dedicated manager for global, non-entity data.
 
 ---
-## Installation
-Download FECS via Clone
-``` bash
-git clone https://github.com/Akihiro120/FECS.git
-```
+## Getting Started
 
-FECS is a `Single Header` library so you only have to add it to your `Vendor/Includes` directory.
+### Prerequisites
+- C++20 compatible compiler (GCC, Clang, MSVC)
+- CMake >= 3.16
 
-To build example projects, simply run 
-e.g. via `Ninja`
+### Building
+To build the project and its examples, use the following commands:
 
-``` bash
+```bash
 mkdir build
 cd build
-
-cmake -G Ninja ..
-ninja
+cmake ..
+cmake --build .
 ```
-
----
-## Prerequisites
-- C++17 compatible compiler (GCC >= 7, Clang >= 6, MSVC >= 2017)
-- CMake >= 3.25 (optional, if you want to build `Example` projects)
 
 ---
 ## Quick Start
-``` cpp
-#include <fecs/fecs.hpp>
+The following example demonstrates how to create a simple application with moving entities and a system to update them.
 
+```cpp
+#include <FECS/FECS.h>
+#include <iostream>
+
+// Define components
 struct Position { float x, y; };
 struct Velocity { float dx, dy; };
 
-int main()
-{
-    FECS::Registry registry;
-
-    // Create 1000 entities with Position + Velocity
-    for (int i = 0; i < 1000; i++)
-    {
-        FECS::Entity e = registry.CreateEntity();
-        registry.Attach<Position>(e, Position{0.0f, 0.0f});
-        registry.Attach<Velocity>(e, Velocity{1.0f, 0.5f});
-    }
-
-    // Simple system
-    FECS::View<Position, Velocity> sys = registry.View<Position, Velocity>();
-    sys.Each([&](Entity e, Position& pos, Velocity& vel){
+// A system that moves entities
+void MoveSystem(FECS::Query<Position&, const Velocity&> query) {
+    query.Each([](Position& pos, const Velocity& vel) {
         pos.x += vel.dx;
         pos.y += vel.dy;
     });
 }
+
+int main() {
+    // Create a world
+    FECS::World world;
+
+    // Create an entity with Position and Velocity components
+    world.Entities().Create()
+        .Attach<Position>({ 0.0f, 0.0f })
+        .Attach<Velocity>({ 1.0f, 0.5f });
+
+    // Add a system to update the position
+    world.Scheduler().AddSystem()
+        .Update()
+        .Build(MoveSystem);
+
+    // Run the scheduler for one frame
+    world.Scheduler().RunStartup();
+    world.Scheduler().Run(0.016f); // Pass delta time
+
+    // You can also query manually
+    auto query = world.Query<const Position&>();
+    query.Each([](const Position& pos){
+        std::cout << "Position: " << pos.x << ", " << pos.y << std::endl;
+    });
+
+    return 0;
+}
 ```
 
-### Usage
-1. **Define** your Components structures.
-2. **Create** a `FECS::Registry` instance.
-3. **Spawn** entities with `.CreateEntity()`, then `.Attach<Component>(...)`.
-4. **Process** groups of components via `.View<...>().Each([&](...){})`.
+---
+## Core Concepts
 
-For *full details*, see the [API Reference](#api-reference).
+### The World
+The `FECS::World` class is the heart of the ECS. It acts as a central hub, providing access to all the underlying managers for entities, components, resources, and scheduling.
+
+### Entities
+You can create entities using the `EntityManager`, accessed via `world.Entities()`.
+
+```cpp
+// Create a new entity and attach components
+world.Entities().Create()
+    .Attach<Position>({ 0.0f, 0.0f })
+    .Attach<Velocity>({ 1.0f, 1.0f });
+```
+
+### Systems & Scheduling
+Systems contain the logic of your application. The `ScheduleManager` (`world.Scheduler()`) is used to define systems, their execution type, and their order.
+
+```cpp
+// A system function
+void MySystem(FECS::Query<MyComponent&> query) {
+    // ... logic ...
+}
+
+// Add the system to the scheduler
+world.Scheduler().AddSystem()
+    .Update() // Or .Startup(), .Fixed(), .Timed()
+    .Build(MySystem);
+```
+Systems are built using a fluent `SystemBuilder` API. You can specify dependencies on resources and other parts of the world.
+
+```cpp
+// A system that needs access to a global resource
+void MySystemWithResource(MyResource& resource, FECS::Query<MyComponent&> query) {
+    // ... logic ...
+}
+
+world.Scheduler().AddSystem()
+    .Update()
+    .Write<MyResource>() // Request write access to the resource
+    .Build(MySystemWithResource);
+
+```
+
+### Queries
+Queries are the primary way to access and iterate over entities with a specific set of components. You can create queries manually or have them passed to your systems.
+
+**1. Manual Queries:**
+Use `world.Query<...>()` to get a query object that you can iterate over.
+
+```cpp
+auto query = world.Query<Position&, const Velocity&>();
+query.Each([](Position& pos, const Velocity& vel) {
+    // ... logic ...
+});
+```
+
+**2. System Queries:**
+When building a system, you can specify a query that will be automatically passed as an argument to your system function.
+
+```cpp
+void MySystem(FECS::Query<Position&> query) {
+    query.Each([](Position& pos) { /* ... */ });
+}
+
+world.Scheduler().AddSystem()
+    .Update()
+    // No .WithQuery<>() is needed, it's inferred from the function signature!
+    .Build(MySystem);
+```
+
+### Resources
+The `ResourceManager` (`world.Resources()`) allows you to store and access global, non-entity data in a type-safe manner.
+
+```cpp
+// Define a resource
+struct GameState { bool isRunning = true; };
+
+// Add the resource to the world
+world.Resources().Add(GameState{});
+
+// Access the resource in a system
+void ControlSystem(GameState& state) {
+    if (/* some condition */) {
+        state.isRunning = false;
+    }
+}
+
+world.Scheduler().AddSystem().Update().Build(ControlSystem);
+```
 
 ---
-## API Reference
-All public classes and functions are documented in [Docs](https://akihiro120.github.io/FECS/html/index.html). Highlights include:
-- `FECS::Registry` - The Core Manager
-- `registry.CreateEntity()`, `registry.DestroyEntity(entity)`
-- `registry.Attach<T>(...)`, `registry.Detach<T>(entity)`
-- `registry.View<Ts...>()`, `.Each(...)`
+## Examples
+The project includes several examples in the `examples` directory. The `boids` example is a great starting point for understanding how to use FECS in a real-world application, demonstrating advanced features like system ordering and spatial hashing.
 
 ---
 ## License
-Distributed under the MIT License. See LICENSE for details.
+Distributed under the MIT License. See [LICENSE](LICENSE) for details.
