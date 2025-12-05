@@ -18,8 +18,9 @@ else()
 endif()
 
 include(CheckCXXCompilerFlag)
-if (PROJECT_IS_TOP_LEVEL)
-    message(STATUS "Building FECS as top-level project. Adding examples.")
+option(FECS_BUILD_EXAMPLES "Build the example executables for FECS" OFF)
+if (FECS_BUILD_EXAMPLES)
+    message(STATUS "Building FECS examples. Adding examples.")
     
     add_subdirectory(examples/benchmark)
     add_subdirectory(examples/scheduling)
