@@ -3,7 +3,7 @@
 [![Test](https://github.com/Akihiro120/FECS/actions/workflows/test.yml/badge.svg)](https://github.com/Akihiro120/FECS/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-> A modern, manager-based, and data-oriented C++20 Entity Component System (ECS) framework designed for performance and ease of use in real-time applications.
+> A modern, manager-based, and data-oriented C++17 Entity Component System (ECS) framework designed for performance and ease of use in real-time applications.
 
 ---
 ## Table of Contents
@@ -25,11 +25,11 @@
 
 ---
 ## Why FECS
-FECS is built on a modular, manager-based architecture that promotes clean, decoupled code. It leverages modern C++20 features and a fluent builder API to provide an expressive and type-safe way to build systems. The design prioritizes data-oriented principles for high performance in demanding applications like games and simulations, while remaining flexible and easy to extend.
+FECS is built on a modular, manager-based architecture that promotes clean, decoupled code. It leverages modern C++17 features and a fluent builder API to provide an expressive and type-safe way to build systems. The design prioritizes data-oriented principles for high performance in demanding applications like games and simulations, while remaining flexible and easy to extend.
 
 ---
 ## Features
-- **Modern C++20 Design**: Utilizes modern C++ features for a clean and efficient implementation.
+- **Modern C++17 Design**: Utilizes modern C++ features for a clean and efficient implementation.
 - **Manager-Based Architecture**: Decoupled managers for Entities, Components, Systems, and more.
 - **Fluent Builder APIs**: Expressive and type-safe APIs for creating entities and defining systems.
 - **Powerful System Scheduling**: Organize systems into ordered sets with support for `Startup`, `Update`, `Fixed`, and `Timed` execution.
@@ -40,7 +40,7 @@ FECS is built on a modular, manager-based architecture that promotes clean, deco
 ## Getting Started
 
 ### Prerequisites
-- C++20 compatible compiler (GCC, Clang, MSVC)
+- C++17 compatible compiler (GCC, Clang, MSVC)
 - CMake >= 3.16
 
 ### Building
@@ -51,6 +51,19 @@ mkdir build
 cd build
 cmake ..
 cmake --build .
+```
+or, Using `FetchContent` via CMake
+```cmake
+include(FetchContent)
+
+FetchContent_Declare(
+    FECS
+    GIT_REPOSITORY https://github.com/Akihiro120/FECS
+    GIT_TAG        main
+)
+
+FetchContent_MakeAvailable(FECS)
+target_link_libraries(${PROJECT_NAME} PRIVATE FECS)
 ```
 
 ---
