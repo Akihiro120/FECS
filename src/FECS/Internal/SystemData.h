@@ -7,6 +7,7 @@ namespace FECS::Internal
     enum class SystemMode
     {
         STARTUP,
+        CLEANUP,
         UPDATE,
         FIXED,
         TIMED
@@ -29,6 +30,7 @@ namespace FECS::Internal
     struct SystemSet
     {
         std::vector<SystemEntry> startupSystem;
+        std::vector<SystemEntry> cleanupSystem;
         std::vector<SystemEntry> updateSystem;
         std::vector<SystemEntry> fixedSystem;
         std::vector<TimedSystem> timedSystems;

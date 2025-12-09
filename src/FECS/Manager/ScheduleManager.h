@@ -119,6 +119,27 @@ namespace FECS::Manager
             }
         }
 
+        auto RunCleanUp() -> void
+        {
+            for (const auto& setIndex : m_SetExecutionOrder)
+            {
+                if (setIndex >= m_Sets.size())
+                {
+                    continue;
+                }
+
+                Internal::SystemSet& set = m_Sets[setIndex];
+
+                for (auto& sys : set.cleanupSystem)
+                {
+                    sys.invoke(sys.object, m_World);
+                    sys.destroy(sys.object);
+                }
+
+                set.cleanupSystem.clear();
+            }
+        }
+
         template <typename Func>
         auto RegisterSystem(
             Func&& func,
@@ -146,6 +167,9 @@ namespace FECS::Manager
             {
             case Internal::SystemMode::STARTUP:
                 set.startupSystem.push_back(callable);
+                break;
+            case Internal::SystemMode::CLEANUP:
+                set.cleanupSystem.push_back(callable);
                 break;
             case Internal::SystemMode::UPDATE:
                 set.updateSystem.push_back(callable);

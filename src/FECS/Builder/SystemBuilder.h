@@ -81,6 +81,12 @@ namespace FECS::Builder
             return *this;
         }
 
+        auto CleanUp() -> SystemBuilder<Args...>&
+        {
+            m_Mode = Internal::SystemMode::CLEANUP;
+            return *this;
+        }
+
         template <typename Fn>
         auto Build(Fn&& func) -> void
         {
