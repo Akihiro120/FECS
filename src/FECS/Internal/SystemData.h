@@ -35,4 +35,16 @@ namespace FECS::Internal
         std::vector<SystemEntry> fixedSystem;
         std::vector<TimedSystem> timedSystems;
     };
+
+    struct StagedSystem
+    {
+        Internal::SystemEntry entry;
+        uint16_t setIndex;
+        Internal::SystemMode mode;
+        float interval;
+
+        std::string name;
+        std::vector<std::string> after;
+        std::vector<std::string> before;
+    };
 }

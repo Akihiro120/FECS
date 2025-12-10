@@ -87,6 +87,24 @@ namespace FECS::Builder
             return *this;
         }
 
+        auto Name(const std::string& name) -> SystemBuilder<Args...>&
+        {
+            m_Name = name;
+            return *this;
+        }
+
+        auto After(const std::string& targetSystemName) -> SystemBuilder<Args...>&
+        {
+            m_After.push_back(targetSystemName);
+            return *this;
+        }
+
+        auto Before(const std::string& targetSystemName) -> SystemBuilder<Args...>&
+        {
+            m_Before.push_back(targetSystemName);
+            return *this;
+        }
+
         template <typename Fn>
         auto Build(Fn&& func) -> void
         {
@@ -115,6 +133,9 @@ namespace FECS::Builder
         float m_Interval = 0.0f;
         uint16_t m_SetIndex = 0;
         Internal::SystemMode m_Mode = Internal::SystemMode::UPDATE;
+        std::string m_Name = "";
+        std::vector<std::string> m_After;
+        std::vector<std::string> m_Before;
 
         Manager::ScheduleManager& m_ScheduleManager;
     };
