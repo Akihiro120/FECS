@@ -3,102 +3,345 @@
 [![Test](https://github.com/Akihiro120/FECS/actions/workflows/test.yml/badge.svg)](https://github.com/Akihiro120/FECS/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-> A functional and lightweight C++ ECS framework.
-> Optimized to *"consume 100% of your memory"* and usage in real-time games.
+> A modern, manager-based, and data-oriented C++17 Entity Component System (ECS) framework designed for performance and ease of use in real-time applications.
 
 ---
 ## Table of Contents
 - [Why FECS?](#why-fecs)
 - [Features](#features)
-- [Installation](#installation)
-- [Prerequisites](#prerequisites)
+- [Getting Started](#getting-started)
+  - [Prerequisites](#prerequisites)
+  - [Building](#building)
 - [Quick Start](#quick-start)
-- [API Reference](#api-reference)
+- [Core Concepts](#core-concepts)
+  - [The World](#the-world)
+  - [Entities](#entities)
+  - [Components](#components)
+  - [Systems & Scheduling](#systems--scheduling)
+  - [Views & Queries](#views--queries)
+  - [Resources](#resources)
+- [Examples](#examples)
 - [License](#license)
 
 ---
 ## Why FECS
-Most ECS libraries trade off binary size for convenience.  
-**FECS** flips that trade-off: by packing data densely and avoiding hidden allocations, it delivers **raw speed** at the cost of larger binaries—perfect when you need unlimited entities and components in a real-time engine.
+FECS is built on a modular, manager-based architecture that promotes clean, decoupled code. It leverages modern C++17 features and a fluent builder API to provide an expressive and type-safe way to build systems. The design prioritizes data-oriented principles for high performance in demanding applications like games and simulations, while remaining flexible and easy to extend.
 
 ---
 ## Features
-- **Header-Only**: Drop all files into your include path.
-- **Zero Hidden Allocations**: Every component pool is pre-allocated and determined at compile time.
-- **Unlimited Entities and Components**: Indexed by 32-bit IDs + versioning.
-- **Control**: Full control over what gets allocated, and how much.
-- **Memory Efficiency**: Densely packed data + effective caching.
+- **Modern C++17 Design**: Utilizes modern C++ features for a clean and efficient implementation.
+- **Manager-Based Architecture**: Decoupled managers for Entities, Components, Systems, and more.
+- **Fluent Builder APIs**: Expressive and type-safe APIs for creating entities and defining systems.
+- **Powerful System Scheduling**: Organize systems into ordered sets with support for `Startup`, `Update`, `Fixed`, and `Timed` execution.
+- **Data-Oriented**: High-performance component storage using sparse sets.
+- **Resource Management**: A dedicated manager for global, non-entity data.
 
 ---
-## Installation
-Download FECS via Clone
-``` bash
-git clone https://github.com/Akihiro120/FECS.git
-```
+## Getting Started
 
-FECS is a `Single Header` library so you only have to add it to your `Vendor/Includes` directory.
+### Prerequisites
+- C++17 compatible compiler (GCC, Clang, MSVC)
+- CMake >= 3.16
 
-To build example projects, simply run 
-e.g. via `Ninja`
+### Building
+To build the project and its examples, use the following commands:
 
-``` bash
+```bash
 mkdir build
 cd build
-
-cmake -G Ninja ..
-ninja
+cmake ..
+cmake --build .
 ```
+or, Using `FetchContent` via CMake
+```cmake
+include(FetchContent)
 
----
-## Prerequisites
-- C++17 compatible compiler (GCC >= 7, Clang >= 6, MSVC >= 2017)
-- CMake >= 3.25 (optional, if you want to build `Example` projects)
+FetchContent_Declare(
+    FECS
+    GIT_REPOSITORY https://github.com/Akihiro120/FECS
+    GIT_TAG        main
+)
+
+FetchContent_MakeAvailable(FECS)
+target_link_libraries(${PROJECT_NAME} PRIVATE FECS)
+```
 
 ---
 ## Quick Start
-``` cpp
-#include <fecs/fecs.hpp>
+The following example demonstrates how to create a simple application with moving entities and a system to update them.
 
+```cpp
+#include <FECS/FECS.h>
+#include <iostream>
+
+// Define components
 struct Position { float x, y; };
 struct Velocity { float dx, dy; };
 
-int main()
+// A system that moves entities
+void MoveSystem(FECS::Query<Position, Velocity> query)
 {
-    FECS::Registry registry;
-
-    // Create 1000 entities with Position + Velocity
-    for (int i = 0; i < 1000; i++)
+    query.Each([](Position& pos, Velocity& vel)
     {
-        FECS::Entity e = registry.CreateEntity();
-        registry.Attach<Position>(e, Position{0.0f, 0.0f});
-        registry.Attach<Velocity>(e, Velocity{1.0f, 0.5f});
-    }
-
-    // Simple system
-    FECS::View<Position, Velocity> sys = registry.View<Position, Velocity>();
-    sys.Each([&](Entity e, Position& pos, Velocity& vel){
         pos.x += vel.dx;
         pos.y += vel.dy;
     });
 }
+
+int main()
+{
+    // Create a world
+    FECS::World world;
+
+    // Create an entity with Position and Velocity components
+    world.Entities().Create()
+        .Attach<Position>({ 0.0f, 0.0f })
+        .Attach<Velocity>({ 1.0f, 0.5f })
+        .Build();
+
+    // Add a system to update the position
+    world.Scheduler()
+        .AddSystem()
+        .WithQuery<Position, Velocity>()
+        .Build(MoveSystem);
+
+    // Run the scheduler for one frame
+    world.Scheduler().Run(0.016f); // Pass delta time
+
+    // You can also query manually
+    world.View().Query<Position>().Each([](FECS::Entity id, Position& pos)
+    {
+        std::cout << "Entity " << id << " Position: " << pos.x << ", " << pos.y << std::endl;
+    });
+
+    return 0;
+}
 ```
 
-### Usage
-1. **Define** your Components structures.
-2. **Create** a `FECS::Registry` instance.
-3. **Spawn** entities with `.CreateEntity()`, then `.Attach<Component>(...)`.
-4. **Process** groups of components via `.View<...>().Each([&](...){})`.
+---
+## Core Concepts
 
-For *full details*, see the [API Reference](#api-reference).
+### The World
+The `FECS::World` class is the heart of the ECS. It acts as a central hub, providing access to all the underlying managers:
+
+```cpp
+FECS::World world;
+
+auto& entityManager = world.Entities();
+auto& componentManager = world.Components();
+auto& resourceManager = world.Resources();
+auto& scheduleManager = world.Scheduler();
+auto& viewManager = world.View();
+```
+
+### Entities
+You can create entities using the `EntityManager`, accessed via `world.Entities()`. The `EntityBuilder` provides a fluent API for composing entities.
+
+#### Creating Entities
+```cpp
+// Create a new entity and attach components
+world.Entities().Create()
+    .Attach<Position>({ 0.0f, 0.0f })
+    .Attach<Velocity>({ 1.0f, 1.0f })
+    .Build();
+```
+
+#### Advanced Entity Composition
+The `EntityBuilder` supports a variety of methods for more complex entity creation:
+
+```cpp
+struct Player {};
+
+world.Entities().Create()
+    // Emplace a component in-place
+    .Emplace<Position>(0.0f, 0.0f)
+    // Add a tag (a component with no data)
+    .Tag<Player>()
+    // Conditionally attach components
+    .When(isGodMode, [](FECS::EntityBuilder& builder)
+    {
+        builder.Attach(Invincibility{});
+    })
+    // Ensure a component exists, adding a default if it doesn't
+    .Ensure(Health{100})
+    // Modify an existing component
+    .Patch<Position>([](Position& pos)
+    {
+        pos.x = 10.0f;
+    })
+    // Apply a custom function to the builder
+    .Apply([](FECS::EntityBuilder& builder)
+    {
+        // ... custom logic ...
+    })
+    // Detach a component
+    .Detach<UselessComponent>()
+    .Build();
+```
+
+### Components
+While the `EntityBuilder` is the primary way to work with components, you can also use the `ComponentManager` directly:
+
+```cpp
+auto& componentManager = world.Components();
+FECS::Entity entity = world.Entities().Create().Build();
+
+// Attach a component
+componentManager.Attach<Position>(entity, {0.0f, 0.0f});
+
+// Check if an entity has a component
+if (componentManager.Has<Position>(entity))
+{
+    // Get a component
+    Position& pos = componentManager.Get<Position>(entity);
+}
+
+// Detach a component
+componentManager.Detach<Position>(entity);
+```
+
+### Systems & Scheduling
+Systems contain the logic of your application. The `ScheduleManager` (`world.Scheduler()`) is used to define systems and their execution properties.
+
+#### System Creation
+The `SystemBuilder` provides a fluent API for defining systems:
+
+```cpp
+// A system that prints the position of entities
+void PrintSystem(FECS::Query<Position> query)
+{
+    query.Each([](Position& pos)
+    {
+        std::cout << "Position: " << pos.x << ", " << pos.y << std::endl;
+    });
+}
+
+world.Scheduler()
+    .AddSystem()
+    .WithQuery<Position>()
+    .Build(PrintSystem);
+```
+
+#### System Dependencies
+Systems can depend on resources. Use `Read<T>` for read-only access and `Write<T>` for read-write access.
+
+```cpp
+struct GameTime { float totalTime; };
+
+void TimeSystem(GameTime& time)
+{
+    time.totalTime += 0.016f;
+}
+
+world.Scheduler()
+    .AddSystem()
+    .Write<GameTime>()
+    .Build(TimeSystem);
+```
+
+#### System Execution
+You can control when a system runs:
+
+- **`Startup()`**: Runs once before the main loop.
+- **`Update()`**: Runs every frame.
+- **`Fixed()`**: Runs at a fixed time step.
+- **`Timed(interval)`**: Runs at a specific interval.
+
+```cpp
+world.Scheduler().SetFixedStep(1.0f / 60.0f);
+
+world.Scheduler().AddSystem().Startup().Build(InitGame);
+world.Scheduler().AddSystem().Update().Build(HandleInput);
+world.Scheduler().AddSystem().Fixed().Build(PhysicsUpdate);
+world.Scheduler().AddSystem().Timed(1.0f).Build(SlowUpdate);
+```
+
+#### System Ordering
+Systems can be organized into groups to control the execution order.
+
+```cpp
+enum SystemGroupID { INPUT = 0, PHYSICS = 1, RENDER = 2 };
+
+world.Scheduler().SetExecutionOrder({
+    SystemGroupID::INPUT,
+    SystemGroupID::PHYSICS,
+    SystemGroupID::RENDER,
+});
+
+world.Scheduler().AddSystem()
+    .In(SystemGroupID::RENDER)
+    .Build(RenderSystem);
+```
+
+### Views & Queries
+The `ViewManager` (`world.View()`) is the entry point for querying entities.
+
+```cpp
+// Get a query for all entities with Position and Velocity
+auto query = world.View().Query<Position, Velocity>();
+
+// Iterate over the entities
+query.Each([](FECS::Entity id, Position& pos, Velocity& vel)
+{
+    // ... logic ...
+});
+```
+
+### Resources
+The `ResourceManager` (`world.Resources()`) allows you to store and access global, non-entity data.
+
+```cpp
+// Define a resource
+struct GameState { float isRunning = true; };
+
+// Add the resource to the world
+world.Resources().Add(GameState{});
+
+// Access the resource directly
+GameState& state = world.Resources().Get<GameState>();
+state.isRunning = false;
+
+// Access the resource in a system
+void ControlSystem(GameState& state)
+{
+    if (/* some condition */)
+    {
+        state.isRunning = false;
+    }
+}
+
+world.Scheduler()
+    .AddSystem()
+    .Write<GameState>()
+    .Build(ControlSystem);
+```
 
 ---
-## API Reference
-All public classes and functions are documented in [Docs](https://akihiro120.github.io/FECS/html/index.html). Highlights include:
-- `FECS::Registry` - The Core Manager
-- `registry.CreateEntity()`, `registry.DestroyEntity(entity)`
-- `registry.Attach<T>(...)`, `registry.Detach<T>(entity)`
-- `registry.View<Ts...>()`, `.Each(...)`
+## Performance Benchmarks
+Benchmarking was performed under normal conditions where component storages are packed.
+
+**Hardware:** Ryzen 5600G 3.9GHz 6 Cores
+
+| Operation            | 100 Entities (ms) | 10,000 Entities (ms) | 1,000,000 Entities (ms) |
+| :------------------- | :---------------- | :------------------- | :---------------------- |
+| Create Entity        | 0.0021            | 0.0604               | 3.4217                  |
+| Add Component        | 0.0145            | 0.1238               | 7.8212                  |
+| Get Component        | 0.0003            | 0.0136               | 1.3510                  |
+| Remove Component     | 0.0033            | 0.0549               | 5.9727                  |
+| Delete Entity        | 0.0131            | 0.0676               | 5.9905                  |
+| Query 2 Components   | 0.0003            | 0.0244               | 2.6986                  |
+| Get 2 Components     | 0.0004            | 0.0249               | 2.4843                  |
+| Query 4 Components   | 0.0015            | 0.0348               | 3.1150                  |
+| Get 4 Components     | 0.0005            | 0.0497               | 4.9651                  |
+
+---
+## Examples
+The project includes several examples in the `examples` directory:
+- **boids**: A classic boids simulation, demonstrating advanced features like system ordering and spatial hashing.
+- **scheduling**: A simple example showcasing the system scheduler.
+- **benchmark**: A set of benchmarks for various ECS operations.
+- **tests**: A collection of tests for various features, and a good place to see the `EntityBuilder` in action.
 
 ---
 ## License
-Distributed under the MIT License. See LICENSE for details.
+Distributed under the MIT License. See [LICENSE](LICENSE) for details.
