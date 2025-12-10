@@ -12,17 +12,17 @@ namespace FECS::Builder
         class ScheduleManager;
     }
 
-    template <typename... Args>
+    template <typename ... Args>
     class SystemBuilder
     {
     private:
-        template <typename... OtherArgs>
+        template <typename ... OtherArgs>
         friend class SystemBuilder;
 
     public:
         SystemBuilder(World& world, Manager::ScheduleManager& manager)
             : m_World(world),
-              m_ScheduleManager(manager)
+            m_ScheduleManager(manager)
         {
         }
 
@@ -42,10 +42,10 @@ namespace FECS::Builder
             return next;
         }
 
-        template <typename... Comps>
-        auto WithQuery() -> SystemBuilder<Args..., QueryBuilder<Comps...>>
+        template <typename ... Comps>
+        auto WithQuery() -> SystemBuilder<Args..., QueryBuilder<Comps...> >
         {
-            auto next = SystemBuilder<Args..., QueryBuilder<Comps...>>(m_World, m_ScheduleManager);
+            auto next = SystemBuilder<Args..., QueryBuilder<Comps...> >(m_World, m_ScheduleManager);
             CopyStateTo(next);
             return next;
         }
@@ -109,9 +109,9 @@ namespace FECS::Builder
         auto Build(Fn&& func) -> void
         {
             auto task = [func](World& world)
-            {
-                func(Internal::Resolver<Args>::Get(world)...);
-            };
+                        {
+                            func(Internal::Resolver<Args>::Get(world)...);
+                        };
 
             RegisterToScheduler(task);
         }
@@ -123,6 +123,9 @@ namespace FECS::Builder
             newBuilder.m_SetIndex = m_SetIndex;
             newBuilder.m_Interval = m_Interval;
             newBuilder.m_Mode = m_Mode;
+            newBuilder.m_Name = m_Name;
+            newBuilder.m_After = m_After;
+            newBuilder.m_Before = m_Before;
         }
 
     private:
