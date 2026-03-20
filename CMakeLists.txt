@@ -36,6 +36,9 @@ message(STATUS "--------------------------------------------")
 # ============================================================
 set(PROJECT_SOURCES
     src/FECS/World/World.cpp
+    src/FECS/Entity/EntityAllocator.cpp
+    src/FECS/Entity.cpp
+    src/FECS/Encoding/Encoder.cpp
 )
 
 add_library(${PROJECT_NAME} STATIC ${PROJECT_SOURCES})
